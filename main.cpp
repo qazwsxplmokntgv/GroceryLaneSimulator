@@ -2,14 +2,14 @@
 #include "TestQueue.hpp"
 
 /*
-*|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
-*|	Name:		Dylan Smith		|\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\|
-*|	Section:	1.10			|>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>|
-*|	Assignment:	PA5				|////////////////////////////////////////////////////////////////////////////////////|
-*|	Due Date:	3/8/24			|////////////////////////////////////////////////////////////////////////////////////|
-*|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
-*|	Grocery Lane Sim: Heavily user-customizable simulation of an express and normal checkout lane at a grocery store.|
-*|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
+*|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
+*| Name:       Dylan Smith     |\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\|
+*| Section:    1.10            |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>|
+*| Assignment: PA5             |////////////////////////////////////////////////////////////////////////////////////|
+*| Due Date:   3/8/24          |////////////////////////////////////////////////////////////////////////////////////|
+*|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
+*| Grocery Lane Sim: Heavily user-customizable simulation of express and normal checkout lanes at a grocery store.  |
+*|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
 */
 
 int main(void) {
@@ -100,7 +100,7 @@ int main(void) {
 		case utility::settingsMenu:
 			switch (currentSelection) {
 			case 1: //toggles
-				if (settings.onlyPrintFinalQueues) break; //toggle dependency lock - prevents hidden toggling if other setting is overriding it
+				if (settings.onlyPrintFinalQueues) break; //toggle dependency based lock - prevents hidden toggling if another setting is overriding it
 				settings.includeQueuePrints = !settings.includeQueuePrints;
 				break;
 			case 2:
@@ -158,7 +158,7 @@ int main(void) {
 				currentMenu = utility::timeUnitMenu;
 				currentSelection = settings.inputUnits == utility::minute ? 1 : settings.inputUnits == utility::hour ? 2 : settings.inputUnits == utility::day ? 3 : 4;
 				break;
-			case 14: //reset settings
+			case 14: //reset settings to defaults
 				settings.showGroceryLists = false;
 				settings.includeQueuePrints = settings.includeArrivalsAndDepartures = true;
 				settings.onlyPrintFinalQueues = false;
@@ -172,7 +172,7 @@ int main(void) {
 				break;
 			case 15: 
 				currentMenu = utility::mainMenu;
-				currentSelection = 3;//settings menu option in main menu - where user last was before moving to submenu
+				currentSelection = 3; //settings menu option in main menu - where user last was before moving to submenu
 				break;
 			}
 			break;
