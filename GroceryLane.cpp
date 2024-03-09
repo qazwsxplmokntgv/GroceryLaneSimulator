@@ -1,12 +1,12 @@
 #include "GroceryLane.hpp"
 
-GroceryLane::GroceryLane(const uniform_int_distribution<>& _possibleGroceryCountRange, const uniform_int_distribution<>& _nextArrivalTimeRange, const std::string& _laneName)
+GroceryLane::GroceryLane(const LaneAttributeSet& attributes)
 {
 	this->custQueue = Queue<Data>();
-	this->possibleGroceryCountRange = _possibleGroceryCountRange;
-	this->nextArrivalTimeRange = _nextArrivalTimeRange;
+	this->possibleGroceryCountRange = attributes.groceryCounts;
+	this->nextArrivalTimeRange = attributes.arrivalTimes;
 	this->currentNextArrivalTime = this->timeUntilEmpty = this->timeUntilServiceComplete = this->worstTime.duration = this->worstTime.start = this->worstTime.end = 0;
-	this->laneName = _laneName;
+	this->laneName = attributes.laneName;
 }
 
 GroceryLane::GroceryLane(const GroceryLane& copy)
@@ -44,15 +44,9 @@ int GroceryLane::getNextArrivalTime(void) const
 	return currentNextArrivalTime;
 }
 
-void GroceryLane::runSim(unsigned int minuteTotal, utility::SimulationSettings settings)
+void GroceryLane::runSim(unsigned int minuteTotal, utility::SimulationSettings settings, int laneTypeCount, std::vector<LaneAttributeSet> laneAttributes)
 {
 	auto simStart = std::chrono::steady_clock::now();
-
-	const uniform_int_distribution<>
-		exprGroceryRange(1, 35),
-		normGroceryRange(20, 60),
-		exprArrivalRange(1, 5),
-		normArrivalRange(3, 8);
 
 	if (settings.onlyPrintFinalQueues) {
 		//disables non-final printouts 
@@ -60,51 +54,39 @@ void GroceryLane::runSim(unsigned int minuteTotal, utility::SimulationSettings s
 		std::cout << "Simulating";
 	}
 
-	//prng, referred to https://cplusplus.com/reference/random/
+	//prng, referred to https://en.cppreference.com/w/cpp/numeric/random
 	mt19937 rng(utility::getTimeSeed());
 
 	std::vector<GroceryLane> lanes;
 
 	//digits to show for each lane number, based on the largest one
-	int laneNumberDigits = settings.expressLaneCount > 1 || settings.normalLaneCount > 1 ? ((int)std::log10(settings.expressLaneCount > settings.normalLaneCount ? settings.expressLaneCount : settings.normalLaneCount) + 1) : 0;
+	//if no duplicate lanes are to be created, = 0
+	int laneNumberDigits = std::any_of(settings.laneCounts.cbegin(), settings.laneCounts.cend(), [](int count) { return count > 1; }) ? ((int)(std::log10(*std::max_element(settings.laneCounts.cbegin(), settings.laneCounts.cend()))) + 1) : 0;
 	
-	for (int i = 1; i <= settings.expressLaneCount; ++i) {
-		GroceryLane newExpr(exprGroceryRange, exprArrivalRange, "EXPR");
-		string rawLaneNum(std::to_string(i));
-		string laneNum("");
-		if (laneNumberDigits > 0) {
-			laneNum.append("-");
-			//adds leading 0s if necessary to keep all lane number digit counts equal
-			for (int j = 0; j < laneNumberDigits - rawLaneNum.size(); ++j) laneNum.append("0");
-			laneNum.append(rawLaneNum);
-			//adds number to the lane name, formatted appropriately based on lane counts
-			newExpr.laneName.append(laneNum);
-		}
-		//rolls first customer of this lane's arrival time
-		newExpr.rollNewArrivalTime(rng);
-		//adds new express lanes
-		lanes.push_back(newExpr);
-	}
+	int laneCount = 0;
+	std::for_each(settings.laneCounts.cbegin(), settings.laneCounts.cend(), [&laneCount](int count) { laneCount += count; });
+	
+	//creates lanes of each type
+	for (int laneType = 0; laneType < laneTypeCount; ++laneType) {
+		//creates each instance of a lane type
+		for (int laneTypeInstanceNum = 1; laneTypeInstanceNum <= settings.laneCounts[laneType]; ++laneTypeInstanceNum) {
+			GroceryLane newLane(laneAttributes[laneType]);
 
-	for (int i = 1; i <= settings.normalLaneCount; ++i) {
-		GroceryLane newNorm(normGroceryRange, normArrivalRange, "NORM");
-		string rawLaneNum(std::to_string(i));
-		string laneNum("");
-		if (laneNumberDigits > 0) {
-			laneNum.append("-");
-			//adds leading 0s if necessary to keep all lane number digit counts equal
-			for (int j = 0; j < laneNumberDigits - rawLaneNum.size(); ++j) laneNum.append("0");
-			laneNum.append(rawLaneNum);
-			//adds number to the lane name, formatted appropriately based on lane counts
-			newNorm.laneName.append(laneNum);
+			//adds lane numbering if there are multiple of at least one lane type
+			if (laneNumberDigits > 0) {
+				string rawLaneNum(std::to_string(laneTypeInstanceNum));
+				newLane.laneName.append("-");
+				//adds leading 0s if necessary to keep all lane number digit counts equal
+				for (int k = 0; k < laneNumberDigits - rawLaneNum.size(); ++k) newLane.laneName.append("0");
+				//adds actual lane number to name following any leading 0s
+				newLane.laneName.append(rawLaneNum);
+			}
+			//rolls first customer of this lane's arrival time
+			newLane.rollNewArrivalTime(rng);
+			//adds the new lane to vector containing all lanes
+			lanes.push_back(newLane);
 		}
-		//rolls first customer of this lane's arrival time
-		newNorm.rollNewArrivalTime(rng);
-		//adds normal lanes
-		lanes.push_back(newNorm);
 	}
-
-	int laneCount = settings.expressLaneCount + settings.normalLaneCount;
 
 	//skips forward to align first customer arrival with simulation start
 	//referred to https://en.cppreference.com/w/cpp/algorithm/all_any_none_of & https://en.cppreference.com/w/cpp/language/lambda

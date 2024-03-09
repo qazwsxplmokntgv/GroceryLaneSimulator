@@ -66,8 +66,15 @@ void TestQueue::testRunSim(void)
 
 	utility::SimulationSettings settings;
 
+	int laneTypeCount = 2;
+
+	std::vector<LaneAttributeSet> laneTypeAttributes = {
+		LaneAttributeSet{ uniform_int_distribution<>(1, 35), uniform_int_distribution<>(1, 5), "EXPR" }, //express
+		LaneAttributeSet{ uniform_int_distribution<>(20, 60), uniform_int_distribution<>(3, 8), "NORM"}  //normal
+	};
+
 	//24 hours with default settings
-	GroceryLane::runSim(24 * 60, settings);
+	GroceryLane::runSim(24 * 60, settings, laneTypeCount, laneTypeAttributes);
 
 	cout << "24 hour simulation completed successfully\n";
 }

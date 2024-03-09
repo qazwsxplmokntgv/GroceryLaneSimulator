@@ -2,6 +2,7 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <conio.h> //_getch() utilized in menuNav() & pause()
 #include <iostream>
@@ -50,9 +51,10 @@ namespace utility {
 		int recycleIDInterval = 1440,
 			//number of minutes between queue printouts
 			queuePrintInterval = 10,
-			//number of each type of lane to simulate
-			expressLaneCount = 1,
-			normalLaneCount = 1;
+			//number of types of lanes
+			laneTypeCount = 2;
+		//number of each type of lane to simulate
+		std::vector<int> laneCounts = { 1,1 };
 		//unit used to interpret user input
 		timeUnit inputUnits = minute;
 	}SimulationSettings;
