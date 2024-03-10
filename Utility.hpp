@@ -28,7 +28,7 @@ namespace utility {
 	enum menu { //underlying values == total opts (excluding non-predefined opts)
 		mainMenu = 4,
 		settingsMenu = 14,
-		timeUnitMenu = 5,
+		timeUnitMenu = 7,
 		laneAttMenu = 3
 	};
 
@@ -36,7 +36,9 @@ namespace utility {
 		minute = 1,
 		hour = 60,
 		day = 1440,
-		week = 10080
+		week = 10080, 
+		month = 43800,
+		year = 525600
 	};
 
 	struct simulationSettings {
@@ -75,6 +77,8 @@ namespace utility {
 
 	//returns a timestamp week.day|hour:minute
 	std::string getTimeStamp(int minute);
+
+	std::string getUnits(timeUnit unit, bool asUpper);
 
 	int getNumericInput(void);
 
