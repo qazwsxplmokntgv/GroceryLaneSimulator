@@ -14,10 +14,8 @@
 */
 
 /* idea log / todo
-* add lane type deletion selection instead of only allowing the last one to be deleted
 * make the order between grocery counts and arrival times consistent across functions and menus
-* make lane attributes display align visually with eachother
-* make lane type edits work (back burner idea, for now they can just be displays)
+* backburner - make attributes in the edit menu always visually aligned based on the largest value (currently using arbitrary 2 digit fill)
 */
 
 int main(void) {
@@ -58,9 +56,9 @@ int main(void) {
 			". Back\n"
 		},{//lane atts menu
 			". Add New Lane Type\n",
-			". Delete Last Lane Type\n",
+			". Delete Lane Type\n",
 			//all lanes and their attributes will be presented here, with editing options
-			". Back"
+			". Back\n"
 		}
 	} };
 
@@ -175,13 +173,15 @@ int main(void) {
 
 						//print the option text
 						if (i < 2) //print the first 2 predefined options normally
-							std::cout << menuOpts[3][i]; 
-						else if (i < 2 + settings.laneTypeCount) //generate each edit option
-							std::cout << ". Edit " << settings.laneTypeAttributes[static_cast<std::vector<utility::laneAttributeSet, std::allocator<utility::laneAttributeSet>>::size_type>(i) - 2].laneName << " Attributes  -  Arrival Times: ["
-								<< std::ceil((double)settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].arrivalTimes.param()._Min * 100 / settings.inputUnits) / 100 << "-"
-								<< std::ceil((double)settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].arrivalTimes.param()._Max * 100 / settings.inputUnits) / 100 << "] | Grocery Counts: ["
-								<< (double)settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].groceryCounts.param()._Min << "-"
-								<< (double)settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].groceryCounts.param()._Max << "]\n";
+							std::cout << menuOpts[3][i];
+						else if (i < 2 + settings.laneTypeCount) {
+							//generate each edit option
+							std::cout << ". Edit " << settings.laneTypeAttributes[static_cast<std::vector<utility::laneAttributeSet, std::allocator<utility::laneAttributeSet>>::size_type>(i) - 2].laneName << " Attributes  -  Arrival Times: [" 
+								<< std::setw(2) << std::setfill('0') << std::ceil((double)settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].arrivalTimes.param()._Min * 100 / settings.inputUnits) / 100 << "-"
+								<< std::setw(2) << std::setfill('0') << std::ceil((double)settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].arrivalTimes.param()._Max * 100 / settings.inputUnits) / 100 << "]" << " | Grocery Counts: ["
+								<< std::setw(2) << std::setfill('0') << (double)settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].groceryCounts.param()._Min << "-"
+								<< std::setw(2) << std::setfill('0') << (double)settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].groceryCounts.param()._Max << "]\n";
+						}
 						else //print back option
 							std::cout << menuOpts[3][2];
 
@@ -330,15 +330,19 @@ int main(void) {
 				++settings.laneTypeCount;
 				break;
 			case 2: //delete lane type
-				settings.laneTypeAttributes.pop_back(); //currently can only delete the last lane type
-				settings.laneCounts.pop_back();
+				if (settings.laneTypeCount == 0) break;
+
+				std::cout << "Enter a number 1-" << settings.laneTypeCount << " to delete: ";
+				{
+					int typeToDelete = utility::getNumericalInput() - 1;
+					settings.laneTypeAttributes.erase(settings.laneTypeAttributes.begin() + typeToDelete);
+					settings.laneCounts.erase(settings.laneCounts.begin() + typeToDelete);
+				}
 				--settings.laneTypeCount;
 				break;
 			default:
-				if (currentSelection != utility::laneAttMenu + settings.laneTypeCount) {
-					std::cout << "\n\nEDITING NOT CURRENTLY AVAILABLE\n\n";
-					utility::pause();
-					//settings.laneTypeAttributes[static_cast<std::vector<utility::laneAttributeSet, std::allocator<utility::laneAttributeSet>>::size_type>(currentSelection) - 2] = utility::getLaneAttributeInput();
+				if (currentSelection != utility::laneAttMenu + settings.laneTypeCount) { //edit
+					settings.laneTypeAttributes.insert(settings.laneTypeAttributes.erase(settings.laneTypeAttributes.begin() + (currentSelection - 3)), utility::getLaneAttributeInput());
 				}
 				else { //back
 					currentMenu = utility::settingsMenu;

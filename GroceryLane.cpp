@@ -87,6 +87,9 @@ void GroceryLane::runSim(unsigned int minuteTotal, utility::simulationSettings s
 			lanes.push_back(newLane);
 		}
 	}
+	
+	//trims vector size after lane creation is complete
+	lanes.shrink_to_fit();
 
 	//skips forward to align first customer arrival with simulation start
 	//referred to https://en.cppreference.com/w/cpp/algorithm/all_any_none_of & https://en.cppreference.com/w/cpp/language/lambda
