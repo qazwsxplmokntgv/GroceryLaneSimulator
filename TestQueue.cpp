@@ -68,9 +68,9 @@ void TestQueue::testRunSim(void)
 
 	int laneTypeCount = 2;
 
-	std::vector<LaneAttributeSet> laneTypeAttributes = {
-		LaneAttributeSet{ uniform_int_distribution<>(1, 35), uniform_int_distribution<>(1, 5), "EXPR" }, //express
-		LaneAttributeSet{ uniform_int_distribution<>(20, 60), uniform_int_distribution<>(3, 8), "NORM"}  //normal
+	std::vector<utility::LaneAttributeSet> laneTypeAttributes = {
+		utility::LaneAttributeSet{ uniform_int_distribution<>(1, 35), uniform_int_distribution<>(1, 5), "EXPR" }, //express
+		utility::LaneAttributeSet{ uniform_int_distribution<>(20, 60), uniform_int_distribution<>(3, 8), "NORM"}  //normal
 	};
 
 	//24 hours with default settings

@@ -1,6 +1,6 @@
 #include "GroceryLane.hpp"
 
-GroceryLane::GroceryLane(const LaneAttributeSet& attributes)
+GroceryLane::GroceryLane(const utility::LaneAttributeSet& attributes)
 {
 	this->custQueue = Queue<Data>();
 	this->possibleGroceryCountRange = attributes.groceryCounts;
@@ -44,7 +44,7 @@ int GroceryLane::getNextArrivalTime(void) const
 	return currentNextArrivalTime;
 }
 
-void GroceryLane::runSim(unsigned int minuteTotal, utility::SimulationSettings settings, int laneTypeCount, std::vector<LaneAttributeSet> laneAttributes)
+void GroceryLane::runSim(unsigned int minuteTotal, utility::SimulationSettings settings, int laneTypeCount, std::vector<utility::LaneAttributeSet> laneAttributes)
 {
 	auto simStart = std::chrono::steady_clock::now();
 

@@ -6,15 +6,9 @@
 #include "Utility.hpp"
 using std::uniform_int_distribution;
 
-typedef struct laneAttributeSet {
-	const uniform_int_distribution<> groceryCounts,
-		arrivalTimes;
-	std::string laneName;
-}LaneAttributeSet;
-
 class GroceryLane {
 public:
-	GroceryLane(const LaneAttributeSet& attributes);
+	GroceryLane(const utility::LaneAttributeSet& attributes);
 	GroceryLane(const GroceryLane& copy);
 	GroceryLane& operator=(const GroceryLane& copy);
 	~GroceryLane() {};
@@ -24,7 +18,7 @@ public:
 
 	int getNextArrivalTime(void) const;
 
-	static void runSim(unsigned int minuteTotal, utility::SimulationSettings settings, int laneTypeCount, std::vector<LaneAttributeSet> laneTypeAttributes);
+	static void runSim(unsigned int minuteTotal, utility::SimulationSettings settings, int laneTypeCount, std::vector<utility::LaneAttributeSet> laneTypeAttributes);
 
 private:
 	//queue of customers currently present in lane

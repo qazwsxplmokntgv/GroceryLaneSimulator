@@ -12,6 +12,13 @@
 
 namespace utility {
 
+	typedef struct laneAttributeSet {
+		const std::uniform_int_distribution<> 
+			groceryCounts,
+			arrivalTimes;
+		std::string laneName;
+	}LaneAttributeSet;
+
 	typedef struct timeInterval {
 		int duration,
 			start,
@@ -20,7 +27,7 @@ namespace utility {
 
 	enum menu { //underlying values are total opts
 		mainMenu = 4,
-		settingsMenu = 15,
+		settingsMenu = 14,
 		timeUnitMenu = 5
 	};
 
@@ -57,17 +64,23 @@ namespace utility {
 		std::vector<int> laneCounts = { 1,1 };
 		//unit used to interpret user input
 		timeUnit inputUnits = minute;
+		std::vector<LaneAttributeSet> laneTypeAttributes = {
+			LaneAttributeSet{ std::uniform_int_distribution<>(1, 35), std::uniform_int_distribution<>(1, 5), "EXPR" }, //express
+			LaneAttributeSet{ std::uniform_int_distribution<>(20, 60), std::uniform_int_distribution<>(3, 8), "NORM"}  //normal
+		};
 	}SimulationSettings;
 
 	//returns a timestamp week.day|hour:minute
 	std::string getTimeStamp(int minute);
+
+	int getNumericalInput(void);
 
 	//prints control info and title
 	void printMenuHeader(void);
 
 	//interprets user menu navigation inputs
 	//returns any selections made by the user
-	int menuNav(int currentSelection, menu currentMenu, bool& stayInMenu);
+	int menuNav(int currentSelection, int menuOpts, bool& stayInMenu);
 
 	//gets a seed for use with rng engines based on current time
 	unsigned int getTimeSeed(void);
