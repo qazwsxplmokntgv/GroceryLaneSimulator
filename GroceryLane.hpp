@@ -20,6 +20,12 @@ public:
 
 	static void runSim(unsigned int minuteTotal, utility::simulationSettings settings, int laneTypeCount, std::vector<utility::laneAttributeSet> laneTypeAttributes);
 
+	void customerArrival(int& customersServed, std::mt19937& rng, const utility::simulationSettings settings, const int& minute);
+	void customerDeparture(int& customersServed, const utility::simulationSettings settings, const int& minute);
+	void decrementLaneTime(void);
+
+	void runLaneMinute(int& customersServed, std::mt19937& rng, const utility::simulationSettings settings, const int& minute);
+
 private:
 	//queue of customers currently present in lane
 	Queue<Data> custQueue;

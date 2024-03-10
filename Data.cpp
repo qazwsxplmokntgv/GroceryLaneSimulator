@@ -1,19 +1,21 @@
 #include "Data.hpp"
 
-Data::Data(mt19937& rng, int _customerNumber, int groceryCount)
+Data::Data(mt19937& rng, int _customerNumber, int _groceryCount)
 {
 	this->customerNumber = _customerNumber;
-	this->groceries = List(groceryCount, rng);
+	this->groceries = List(_groceryCount, rng);
 	this->calculateServiceTime();
 	this->totalTime = 0;
+	this->groceryCount = _groceryCount;
 }
 
-Data::Data(int _customerNumber, int groceryCount)
+Data::Data(int _customerNumber, int _groceryCount)
 {
 	this->customerNumber = _customerNumber;
 	this->groceries = List();
-	this->calculateServiceTime(groceryCount);
+	this->calculateServiceTime(_groceryCount);
 	this->totalTime = 0;
+	this->groceryCount = _groceryCount;
 }
 
 Data::Data(const Data& copy)
@@ -22,6 +24,7 @@ Data::Data(const Data& copy)
 	this->serviceTime = copy.serviceTime;
 	this->totalTime = copy.totalTime;
 	this->groceries = copy.groceries;
+	this->groceryCount = copy.groceryCount;
 }
 
 Data& Data::operator=(const Data& copy)
@@ -30,6 +33,7 @@ Data& Data::operator=(const Data& copy)
 	this->serviceTime = copy.serviceTime;
 	this->totalTime = copy.totalTime;
 	this->groceries = copy.groceries;
+	this->groceryCount = copy.groceryCount;
 	return *this;
 }
 
@@ -49,7 +53,7 @@ void Data::calculateServiceTime(int groceryCount)
 
 string Data::arrivalMessage() const
 {
-	return "Customer " + std::string((6 - std::to_string(customerNumber).length()), '0') + std::to_string(customerNumber) + " arrives: " + std::to_string(groceries.getSize()) + " groceries (" + std::to_string(serviceTime) + " minutes).\n";
+	return "Customer " + std::string((6 - std::to_string(customerNumber).length()), '0') + std::to_string(customerNumber) + " arrives: " + std::to_string(groceryCount) + " groceries (" + std::to_string(serviceTime) + " minutes).\n";
 }
 
 string Data::departureMessage() const

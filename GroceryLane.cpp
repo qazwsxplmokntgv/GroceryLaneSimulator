@@ -46,12 +46,12 @@ int GroceryLane::getNextArrivalTime(void) const
 
 void GroceryLane::runSim(unsigned int minuteTotal, utility::simulationSettings settings, int laneTypeCount, std::vector<utility::laneAttributeSet> laneAttributes)
 {
+	//starts execution timer
 	auto simStart = std::chrono::steady_clock::now();
 
-	if (settings.onlyPrintFinalQueues) {
-		//disables non-final printouts 
+	if (settings.onlyPrintFinalQueues) { //disables non-final printouts 
 		settings.includeArrivalsAndDepartures = settings.includeQueuePrints = false;
-		std::cout << "Simulating";
+		std::cout << "Simulating"; //prints message to indicate the program running in the absence of in-progress printouts
 	}
 
 	//prng, referred to https://en.cppreference.com/w/cpp/numeric/random
@@ -63,7 +63,7 @@ void GroceryLane::runSim(unsigned int minuteTotal, utility::simulationSettings s
 	//if no duplicate lanes are to be created, = 0
 	int laneNumberDigits = std::any_of(settings.laneCounts.cbegin(), settings.laneCounts.cend(), [](int count) { return count > 1; }) ? ((int)(std::log10(*std::max_element(settings.laneCounts.cbegin(), settings.laneCounts.cend()))) + 1) : 0;
 	
-	int laneCount = 0;
+	int laneCount = 0; //sum of each type lane count
 	std::for_each(settings.laneCounts.cbegin(), settings.laneCounts.cend(), [&laneCount](int count) { laneCount += count; });
 	
 	//creates lanes of each type
@@ -93,93 +93,34 @@ void GroceryLane::runSim(unsigned int minuteTotal, utility::simulationSettings s
 
 	//skips forward to align first customer arrival with simulation start
 	//referred to https://en.cppreference.com/w/cpp/algorithm/all_any_none_of & https://en.cppreference.com/w/cpp/language/lambda
-	//while every lane is still waiting for their first customer, evenly decrement waiting time of each
+	//while every lane is still waiting for their first customer
 	while (lanes.size() != 0 && std::all_of(lanes.cbegin(), lanes.cend(), [](GroceryLane lane) { return (bool)lane.getNextArrivalTime(); })) {
-		for (int j = 0; j < laneCount; ++j) {
-			--lanes[j].currentNextArrivalTime;
-		}
+		//evenly decrement waiting time of each lane
+		for (int j = 0; j < laneCount; ++j) --lanes[j].currentNextArrivalTime;
 	}
 
 	int customersServed = 0;
 
 	//simulation begins
-	for (unsigned int i = 0; i < minuteTotal; ++i) {
-		if (settings.recycleIDInterval && !(i % settings.recycleIDInterval)) customersServed = 0; //resets count regularly
+	for (unsigned int minute = 0; minute < minuteTotal; ++minute) {
+		if (settings.recycleIDInterval && !(minute % settings.recycleIDInterval)) customersServed = 0; //resets count regularly
 		
 		if (settings.onlyPrintFinalQueues) { //ellipses loading animation if intermediate printouts are omitted
 			//1/4 progress || 1/2 progress || 3/4 progress
-			if (i == minuteTotal / 4 || i == minuteTotal / 2 || i == (3 * minuteTotal) / 4) { 
-				std::cout << '.';
-			}
+			if (minute == minuteTotal / 4 || minute == minuteTotal / 2 || minute == (3 * minuteTotal) / 4) std::cout << '.';
 		}
 
 		//for each lane
-		for (int j = 0; j < laneCount; ++j) {
-			//if a customer is due to arrive to this lane
-			if (lanes[j].currentNextArrivalTime == 0) {
-
-				//constructs new customer 
-				Data newCust;
-				if (settings.showGroceryLists)newCust = Data(rng, ++customersServed, lanes[j].possibleGroceryCountRange(rng));
-				//uses a fake grocery list if a real one is not necessary, to save resources
-				else newCust = Data(++customersServed, lanes[j].possibleGroceryCountRange(rng));
-
-				//if this customer will immediately check out upon arrival in lane, notes how long they will be checking out
-				if (lanes[j].custQueue.isEmpty()) 
-					lanes[j].timeUntilServiceComplete = newCust.getServiceTime();
-
-				//adds the new customer's service time to the current total wait time of the lane
-				lanes[j].timeUntilEmpty += newCust.getServiceTime();
-				//calculates the time the customer will spend in line
-				newCust.setTotalTime(lanes[j].timeUntilEmpty);
-
-				//tracks the worst total time of any customer in this lane
-				if (settings.trackWorstTimes && lanes[j].timeUntilEmpty > lanes[j].worstTime.duration) {
-					lanes[j].worstTime.duration = lanes[j].timeUntilEmpty;
-					lanes[j].worstTime.start = i;
-					lanes[j].worstTime.end = i + lanes[j].timeUntilEmpty;
-				}
-
-				//adds the customer to the queue
-				lanes[j].custQueue.enqueue(newCust);
-				if (settings.includeArrivalsAndDepartures) {
-					//announces new customer
-					std::cout << utility::getTimeStamp(i) << " " << lanes[j].laneName << ": " << newCust.arrivalMessage();
-					if (settings.showGroceryLists) {
-						//displays the new customer's groceries
-						std::cout << newCust.getGroceries().listToString() << std::endl;
-					}
-				}
-
-				//begins count down to next arrival
-				lanes[j].rollNewArrivalTime(rng);
-			}
-
-			//if the lane finishes serving a customer
-			if (!lanes[j].custQueue.isEmpty() && lanes[j].timeUntilServiceComplete == 0) {
-				//dequeues customer
-				Data departingCust = lanes[j].custQueue.dequeue();
-				if (settings.includeArrivalsAndDepartures) {
-					//anounces departure
-					std::cout << utility::getTimeStamp(i) << " " << lanes[j].laneName << ": " << departingCust.departureMessage();
-				}
-				//if there is another customer to begin serving in the queue, find how long that will take
-				if (!lanes[j].custQueue.isEmpty())
-					lanes[j].timeUntilServiceComplete = lanes[j].custQueue.peek().getServiceTime();
-			}
-
-			//decrements the time until next customer arrival
-			--lanes[j].currentNextArrivalTime;
-			//decrements the wait time for future customers if not 0
-			if(lanes[j].timeUntilEmpty) --lanes[j].timeUntilEmpty;
-			//decrements the time until the current customer finishes being serviced if not 0
-			if (lanes[j].timeUntilServiceComplete) --lanes[j].timeUntilServiceComplete;
+		for (int laneIdx = 0; laneIdx < laneCount; ++laneIdx) {
+			lanes[laneIdx].runLaneMinute(customersServed, rng, settings, minute);
 		}
 
-		if (settings.queuePrintInterval && !(i % settings.queuePrintInterval) && settings.includeQueuePrints) {
+		//if queue prints are enabled, print each lane's queue
+		if (settings.queuePrintInterval && !(minute % settings.queuePrintInterval) && settings.includeQueuePrints) {
 			for (int j = 0; j < laneCount; ++j) {
-				std::cout << std::endl;
-				std::cout << utility::getTimeStamp(i) << " " << lanes[j].laneName << " QUEUE" << ":\n";
+				//queue header
+				std::cout << std::endl << utility::getTimeStamp(minute) << " " << lanes[j].laneName << " QUEUE" << ":\n";
+				//queue print
 				lanes[j].custQueue.printQueue();
 			}
 			std::cout << std::endl;
@@ -187,15 +128,17 @@ void GroceryLane::runSim(unsigned int minuteTotal, utility::simulationSettings s
 			if (settings.clearOnQueue) utility::clearScreen();
 		}
 	}
+
+	//concluding the simulation
 	std::cout << std::endl;
 
 	//clears "simulating..." message 
 	if (settings.onlyPrintFinalQueues) utility::clearScreen();
 
 	//final queue printout
-	for (int i = 0; (settings.includeQueuePrints || settings.onlyPrintFinalQueues) && i < laneCount; ++i) {
-		std::cout << utility::getTimeStamp(minuteTotal) << " " << lanes[i].laneName << " QUEUE" << ":\n";
-		lanes[i].custQueue.printQueue();
+	for (int laneIdx = 0; (settings.includeQueuePrints || settings.onlyPrintFinalQueues) && laneIdx < laneCount; ++laneIdx) {
+		std::cout << utility::getTimeStamp(minuteTotal) << " " << lanes[laneIdx].laneName << " QUEUE" << ":\n";
+		lanes[laneIdx].custQueue.printQueue();
 		std::cout << std::endl;
 	}
 
@@ -209,9 +152,91 @@ void GroceryLane::runSim(unsigned int minuteTotal, utility::simulationSettings s
 	}
 	std::cout << std::endl;
 
-	//referred to https://en.cppreference.com/w/cpp/header/chrono
+	//stops execution timer
 	auto executionTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - simStart).count();
+	//execution time printout
 	//minutes:seconds:milliseconds
 	if (settings.measureExecutionTime) std::cout << "Execution Time: [" << std::setw(2) << std::setfill('0') << executionTime / 60000 << ":" << std::setw(2) << std::setfill('0') << (executionTime % 60000) / 1000 << ":" << std::setw(4) << std::setfill('0') << executionTime % 1000 << "]\n";
+}
+
+void GroceryLane::customerArrival(int& customersServed, std::mt19937& rng, const utility::simulationSettings settings, const int& minute)
+{
+	//constructs new customer 
+	Data newCust;
+	if (settings.showGroceryLists)
+		newCust = Data(rng, ++customersServed, this->possibleGroceryCountRange(rng));
+	else //uses a grocery count instead of a list if a list does not need to be generated for display
+		newCust = Data(++customersServed, this->possibleGroceryCountRange(rng));
+
+	//if this customer will immediately check out upon arrival in lane, notes how long they will be checking out
+	if (this->custQueue.isEmpty())
+		this->timeUntilServiceComplete = newCust.getServiceTime();
+
+	//adds the new customer's service time to the current total wait time of the lane
+	this->timeUntilEmpty += newCust.getServiceTime();
+	//calculates the time the customer will spend in line
+	newCust.setTotalTime(this->timeUntilEmpty);
+
+	//tracks the worst total time of any customer in this lane
+	if (settings.trackWorstTimes && this->timeUntilEmpty > this->worstTime.duration) {
+		this->worstTime.duration = this->timeUntilEmpty;
+		this->worstTime.start = minute;
+		this->worstTime.end = minute + this->timeUntilEmpty;
+	}
+
+	//adds the customer to the queue
+	this->custQueue.enqueue(newCust);
+	if (settings.includeArrivalsAndDepartures) {
+		//announces new customer
+		std::cout << utility::getTimeStamp(minute) << " " << this->laneName << ": " << newCust.arrivalMessage();
+		if (settings.showGroceryLists) {
+			//displays the new customer's groceries
+			std::cout << newCust.getGroceries().listToString() << std::endl;
+		}
+	}
+
+	//begins count down to next arrival
+	this->rollNewArrivalTime(rng);
+}
+
+void GroceryLane::customerDeparture(int& customersServed, const utility::simulationSettings settings, const int& minute)
+{
+	//dequeues customer
+	Data departingCust = this->custQueue.dequeue();
+
+	if (settings.includeArrivalsAndDepartures)  //anounces departure
+		std::cout << utility::getTimeStamp(minute) << " " << this->laneName << ": " << departingCust.departureMessage();
+
+	//if there is another customer to begin serving in the queue, find how long that will take
+	if (!this->custQueue.isEmpty())
+		this->timeUntilServiceComplete = this->custQueue.peek().getServiceTime();
+}
+
+void GroceryLane::decrementLaneTime(void)
+{
+	//decrements the time until next customer arrival
+	--this->currentNextArrivalTime;
+
+	//decrements the wait time for future customers if not 0
+	if (this->timeUntilEmpty)
+		--this->timeUntilEmpty;
+
+	//decrements the time until the current customer finishes being serviced if not 0
+	if (this->timeUntilServiceComplete)
+		--this->timeUntilServiceComplete;
+}
+
+void GroceryLane::runLaneMinute(int& customersServed, std::mt19937& rng, const utility::simulationSettings settings, const int& minute)
+{
+	//if a customer is due to arrive to this lane
+	if (this->currentNextArrivalTime == 0)
+		this->customerArrival(customersServed, rng, settings, minute);
+
+	//if the lane finishes serving a customer
+	if (!this->custQueue.isEmpty() && this->timeUntilServiceComplete == 0)
+		this->customerDeparture(customersServed, settings, minute);
+
+	//decrements time values of lane as the current minute passes
+	this->decrementLaneTime();
 }
 
