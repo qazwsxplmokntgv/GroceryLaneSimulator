@@ -8,7 +8,7 @@ using std::uniform_int_distribution;
 
 class GroceryLane {
 public:
-	GroceryLane(const utility::LaneAttributeSet& attributes);
+	GroceryLane(const utility::laneAttributeSet& attributes);
 	GroceryLane(const GroceryLane& copy);
 	GroceryLane& operator=(const GroceryLane& copy);
 	~GroceryLane() {};
@@ -18,7 +18,7 @@ public:
 
 	int getNextArrivalTime(void) const;
 
-	static void runSim(unsigned int minuteTotal, utility::SimulationSettings settings, int laneTypeCount, std::vector<utility::LaneAttributeSet> laneTypeAttributes);
+	static void runSim(unsigned int minuteTotal, utility::simulationSettings settings, int laneTypeCount, std::vector<utility::laneAttributeSet> laneTypeAttributes);
 
 private:
 	//queue of customers currently present in lane
@@ -34,7 +34,7 @@ private:
 		//minutes until the current front customer finishes checking out
 		timeUntilServiceComplete;
 	//worst observed total time for this lane
-	utility::TimeInterval worstTime;
+	utility::timeInterval worstTime;
 
 	//name of the lane
 	std::string laneName;

@@ -12,23 +12,24 @@
 
 namespace utility {
 
-	typedef struct laneAttributeSet {
+	struct laneAttributeSet {
 		const std::uniform_int_distribution<> 
 			groceryCounts,
 			arrivalTimes;
 		std::string laneName;
-	}LaneAttributeSet;
+	};
 
-	typedef struct timeInterval {
+	struct timeInterval {
 		int duration,
 			start,
 			end;
-	}TimeInterval;
+	};
 
-	enum menu { //underlying values are total opts
+	enum menu { //underlying values == total opts (excluding non-predefined opts)
 		mainMenu = 4,
 		settingsMenu = 14,
-		timeUnitMenu = 5
+		timeUnitMenu = 5,
+		laneAttMenu = 3
 	};
 
 	enum timeUnit {
@@ -38,7 +39,7 @@ namespace utility {
 		week = 10080
 	};
 
-	typedef struct simulationSettings {
+	struct simulationSettings {
 		//toggle for including printout of grocery lists
 		bool showGroceryLists = false,
 			//toggle for inclusion of full queue printouts every 10 minutes
@@ -64,16 +65,20 @@ namespace utility {
 		std::vector<int> laneCounts = { 1,1 };
 		//unit used to interpret user input
 		timeUnit inputUnits = minute;
-		std::vector<LaneAttributeSet> laneTypeAttributes = {
-			LaneAttributeSet{ std::uniform_int_distribution<>(1, 35), std::uniform_int_distribution<>(1, 5), "EXPR" }, //express
-			LaneAttributeSet{ std::uniform_int_distribution<>(20, 60), std::uniform_int_distribution<>(3, 8), "NORM"}  //normal
+		std::vector<laneAttributeSet> laneTypeAttributes = {
+			laneAttributeSet{ std::uniform_int_distribution<>(1, 35), std::uniform_int_distribution<>(1, 5), "EXPR" }, //express
+			laneAttributeSet{ std::uniform_int_distribution<>(20, 60), std::uniform_int_distribution<>(3, 8), "NORM"}  //normal
 		};
-	}SimulationSettings;
+	};
+
+	simulationSettings reset(simulationSettings& settings);
 
 	//returns a timestamp week.day|hour:minute
 	std::string getTimeStamp(int minute);
 
 	int getNumericalInput(void);
+
+	laneAttributeSet getLaneAttributeInput(void);
 
 	//prints control info and title
 	void printMenuHeader(void);

@@ -1,6 +1,25 @@
 #include "Utility.hpp"
 
 namespace utility {
+	simulationSettings reset(simulationSettings& settings)
+	{
+		settings.showGroceryLists = false;
+		settings.includeQueuePrints = settings.includeArrivalsAndDepartures = true;
+		settings.onlyPrintFinalQueues = false;
+		settings.trackWorstTimes = true;
+		settings.pauseOnQueue = settings.clearOnQueue = false;
+		settings.measureExecutionTime = true;
+		settings.recycleIDInterval = 1440;
+		settings.queuePrintInterval = 10;
+		settings.laneTypeCount = 2;
+		settings.laneCounts.resize(settings.laneTypeCount);
+		settings.laneCounts[0] = settings.laneCounts[1] = 1;
+		settings.inputUnits = minute;
+		settings.laneTypeAttributes.resize(0);
+		settings.laneTypeAttributes.push_back({ std::uniform_int_distribution<>(1, 35), std::uniform_int_distribution<>(1, 5), "EXPR" }); //express
+		settings.laneTypeAttributes.push_back({ std::uniform_int_distribution<>(20, 60), std::uniform_int_distribution<>(3, 8), "NORM" });  //normal
+		return settings;
+	}
 	std::string getTimeStamp(int minute)
 	{
 		return std::string("[")
@@ -17,6 +36,27 @@ namespace utility {
 		while (!std::isdigit(std::cin.peek())) std::cin.ignore(1);
 		std::cin >> out;
 		return out;
+	}
+
+	laneAttributeSet getLaneAttributeInput(void)
+	{
+		int maxGroc = 0, maxArrv = 0;
+		std::cout << "\nEnter New Lane Type Information:\n";
+		std::cout << "\tMin Arrival Interval: ";
+		int minArrv = utility::getNumericalInput();
+		std::cout << "\tMax Arrival Interval: ";
+		while (maxArrv < minArrv) maxArrv = utility::getNumericalInput();
+		std::cout << "\tMin Grocery Count: ";
+		int minGroc = utility::getNumericalInput();
+		std::cout << "\tMax Grocery Count: ";
+		while (maxGroc < minGroc) maxGroc = utility::getNumericalInput();
+		std::cout << "\t4 Letter Lane Code: ";
+		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		while (std::cin.peek() < 0) std::cin.ignore(1);
+		char code[5];
+		std::cin.readsome(code, 4);
+		code[4] = '\0';
+		return { std::uniform_int_distribution<>(minGroc, maxGroc), std::uniform_int_distribution<>(minArrv, maxArrv), code };
 	}
 
 	void printMenuHeader(void)

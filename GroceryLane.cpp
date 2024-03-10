@@ -1,6 +1,6 @@
 #include "GroceryLane.hpp"
 
-GroceryLane::GroceryLane(const utility::LaneAttributeSet& attributes)
+GroceryLane::GroceryLane(const utility::laneAttributeSet& attributes)
 {
 	this->custQueue = Queue<Data>();
 	this->possibleGroceryCountRange = attributes.groceryCounts;
@@ -44,7 +44,7 @@ int GroceryLane::getNextArrivalTime(void) const
 	return currentNextArrivalTime;
 }
 
-void GroceryLane::runSim(unsigned int minuteTotal, utility::SimulationSettings settings, int laneTypeCount, std::vector<utility::LaneAttributeSet> laneAttributes)
+void GroceryLane::runSim(unsigned int minuteTotal, utility::simulationSettings settings, int laneTypeCount, std::vector<utility::laneAttributeSet> laneAttributes)
 {
 	auto simStart = std::chrono::steady_clock::now();
 
@@ -91,7 +91,7 @@ void GroceryLane::runSim(unsigned int minuteTotal, utility::SimulationSettings s
 	//skips forward to align first customer arrival with simulation start
 	//referred to https://en.cppreference.com/w/cpp/algorithm/all_any_none_of & https://en.cppreference.com/w/cpp/language/lambda
 	//while every lane is still waiting for their first customer, evenly decrement waiting time of each
-	while (std::all_of(lanes.cbegin(), lanes.cend(), [](GroceryLane lane) { return (bool)lane.getNextArrivalTime(); })) {
+	while (lanes.size() != 0 && std::all_of(lanes.cbegin(), lanes.cend(), [](GroceryLane lane) { return (bool)lane.getNextArrivalTime(); })) {
 		for (int j = 0; j < laneCount; ++j) {
 			--lanes[j].currentNextArrivalTime;
 		}
