@@ -176,19 +176,14 @@ int main(void) {
 							std::cout << menuOpts[3][i];
 						else if (i < 2 + settings.laneTypeCount) {
 							//generate each edit option
-							std::cout << ". Edit " << settings.laneTypeAttributes[static_cast<std::vector<utility::laneAttributeSet, std::allocator<utility::laneAttributeSet>>::size_type>(i) - 2].laneName << " Attributes  -  Arrival Times: [" 
+							std::cout << ". Edit " << settings.laneTypeAttributes[static_cast<std::vector<utility::laneAttributeSet, std::allocator<utility::laneAttributeSet>>::size_type>(i) - 2].laneName << " Attributes  -  Arrival Times: ["
 								<< std::setw(2) << std::setfill('0') << std::ceil((double)settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].arrivalTimes.param()._Min * 100 / settings.inputUnits) / 100 << "-"
 								<< std::setw(2) << std::setfill('0') << std::ceil((double)settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].arrivalTimes.param()._Max * 100 / settings.inputUnits) / 100 << "]" << " | Grocery Counts: ["
 								<< std::setw(2) << std::setfill('0') << (double)settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].groceryCounts.param()._Min << "-"
 								<< std::setw(2) << std::setfill('0') << (double)settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].groceryCounts.param()._Max << "]\n";
 						}
-						else //print back option
-							std::cout << menuOpts[3][2];
-
-
-						//lanes attributes
-						if (i > 1 && i < 2 + settings.laneTypeCount) {
-							
+						else { //print back option
+							std::cout << menuOpts[3][static_cast<std::vector<std::string, std::allocator<std::string>>::size_type>(utility::laneAttMenu) - 1];
 						}
 					}
 				}
