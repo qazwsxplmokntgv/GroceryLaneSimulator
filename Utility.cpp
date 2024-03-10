@@ -11,6 +11,14 @@ namespace utility {
 			+ "]";
 	}
 
+	int getNumericalInput(void)
+	{
+		int out;
+		while (!std::isdigit(std::cin.peek())) std::cin.ignore(1);
+		std::cin >> out;
+		return out;
+	}
+
 	void printMenuHeader(void)
 	{
 		//menu controls
@@ -26,7 +34,7 @@ namespace utility {
 			"                               |___/\n";
 	}
 
-	int menuNav(int currentSelection, menu currentMenu, bool& stayInMenu)
+	int menuNav(int currentSelection, int menuOpts, bool& stayInMenu)
 	{
 		//getting user input for menu nav
 		bool gettingInput = true,
@@ -44,7 +52,7 @@ namespace utility {
 				mightBeArrow = false;
 			case 'z': //scroll up
 				--currentSelection;
-				if (currentSelection < 1) currentSelection = currentMenu; //current menu underlying value is number of options
+				if (currentSelection < 1) currentSelection = menuOpts; //current menu underlying value is number of options
 				break;
 			case 80: //down
 			case 77: //right
@@ -52,7 +60,7 @@ namespace utility {
 				mightBeArrow = false;
 			case 'x': //scroll down
 				++currentSelection;
-				if (currentSelection > currentMenu) currentSelection = 1;
+				if (currentSelection > menuOpts) currentSelection = 1;
 				break;
 			case ' ':
 			case '\n':
