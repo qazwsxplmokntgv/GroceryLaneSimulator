@@ -50,6 +50,8 @@ int main(void) {
 			". Hours\n",
 			". Days\n",
 			". Weeks\n",
+			". Months\n",
+			". Years\n",
 			". Back\n"
 		},{//lane atts menu
 			". Add New Lane Type\n",
@@ -150,7 +152,7 @@ int main(void) {
 							std::cout << ((double)settings.queuePrintInterval) / settings.inputUnits << "]\n";
 							break;
 						case 10:
-							std::cout << (settings.inputUnits == utility::minute ? "MINUTES" : settings.inputUnits == utility::hour ? "HOURS" : settings.inputUnits == utility::day ? "DAYS" : "WEEKS") << "]\n";
+							std::cout << (utility::getUnits(settings.inputUnits, true)) << "]\n";
 							break;
 						}
 					}
@@ -200,9 +202,12 @@ int main(void) {
 		case utility::mainMenu:
 			switch (currentSelection) {
 			case 1: //run sim
-				std::cout << "\nEnter Simulation Duration (" << (settings.inputUnits == utility::minute ? "minutes" : settings.inputUnits == utility::hour ? "hours" : settings.inputUnits == utility::day ? "days" : "weeks") << "): ";
-				utility::clearScreen();
-				GroceryLane::runSim(utility::getNumericInput() * settings.inputUnits, settings, settings.laneTypeCount, settings.laneTypeAttributes);
+				std::cout << "\nEnter Simulation Duration (" << utility::getUnits(settings.inputUnits, false) << "): ";
+				{
+					int simDuration = utility::getNumericInput() * settings.inputUnits;
+					utility::clearScreen();
+					GroceryLane::runSim(simDuration, settings, settings.laneTypeCount, settings.laneTypeAttributes);
+				}
 				utility::pause();
 				break;
 			case 2: //tests
@@ -306,7 +311,13 @@ int main(void) {
 			case 4: //weeks
 				settings.inputUnits = utility::week;
 				break;
-			case 5: //back
+			case 5: //months
+				settings.inputUnits = utility::month;
+				break;
+			case 6: //years
+				settings.inputUnits = utility::year;
+				break;
+			case 7: //back
 				break;
 			}
 			currentMenu = utility::settingsMenu;

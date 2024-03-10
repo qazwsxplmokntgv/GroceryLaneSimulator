@@ -23,11 +23,32 @@ namespace utility {
 	std::string getTimeStamp(int minute)
 	{
 		return std::string("[")
-			+ std::to_string(minute / week) + "." //weeks
-			+ std::to_string(minute % week / day) + "|" //days
+			+ std::to_string(minute / year) + "." //months
+			+ std::to_string(minute % year / month) + "." //months
+			+ (((minute % month / day) < 10) ? "0" : "") + std::to_string(minute % month / day) + "|" //days
 			+ (((minute % day / hour) < 10) ? "0" : "") + std::to_string(minute % day / hour) + ":" //hours
 			+ (((minute % hour) < 10) ? "0" : "") + std::to_string(minute % hour) //minutes
 			+ "]";
+	}
+
+	std::string getUnits(timeUnit unit, bool asUpper)
+	{
+		switch (unit) {
+		case minute:
+			return asUpper ? "MINUTES" : "minutes";
+		case hour:
+			return asUpper ? "HOURS" : "hours";
+		case day:
+			return asUpper ? "DAYS" : "days";
+		case week:
+			return asUpper ? "WEEKS" : "weeks";
+		case month:
+			return asUpper ? "MONTHS" : "months";
+		case year:
+			return asUpper ? "YEARS" : "years";
+		default:
+			return "ERROR";
+		}
 	}
 
 	int getNumericInput(void)
