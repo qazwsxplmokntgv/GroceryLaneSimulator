@@ -12,6 +12,7 @@
 */
 
 /* idea log / todo
+* fix crash when destructing extremely large queues
 * backburner - make attributes in the edit menu always visually aligned based on the largest value (currently using arbitrary 2 digit fill)
 */
 
