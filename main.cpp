@@ -279,7 +279,7 @@ int main(void) {
 			}
 			if (currentSelection == 11 + settings.laneTypeCount) { //change unit that user input is interpreted as
 				currentMenu = utility::timeUnitMenu;
-				currentSelection = settings.inputUnits == utility::minute ? 1 : settings.inputUnits == utility::hour ? 2 : settings.inputUnits == utility::day ? 3 : 4;
+				currentSelection = settings.inputUnits == utility::minute ? 1 : settings.inputUnits == utility::hour ? 2 : settings.inputUnits == utility::day ? 3 : settings.inputUnits == utility::week ? 4 : settings.inputUnits == utility::month ? 5 : 6;
 				break;
 			}
 			if (currentSelection == 12 + settings.laneTypeCount) { //add, edit, or delete lane types

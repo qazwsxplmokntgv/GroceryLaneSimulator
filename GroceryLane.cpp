@@ -204,7 +204,7 @@ void GroceryLane::runSim(unsigned int minuteTotal, utility::simulationSettings s
 	//worst time printout
 	for (int i = 0; settings.trackWorstTimes && i < laneCount; ++i) {
 		std::cout 
-			<< lanes[i].laneName << " Highest Total Time - " << std::setw(4) << std::setfill(' ') << lanes[i].worstTime.duration << " minutes:"
+			<< lanes[i].laneName << " Highest Total Time - " << std::setw(4) << std::setfill(' ') << lanes[i].worstTime.duration << " minutes: "
 			<< utility::getTimeStamp(lanes[i].worstTime.start) << "-" << utility::getTimeStamp(lanes[i].worstTime.end) << std::endl;
 	}
 	std::cout << std::endl;
