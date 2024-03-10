@@ -13,7 +13,7 @@
 namespace utility {
 
 	struct laneAttributeSet {
-		const std::uniform_int_distribution<> 
+		std::uniform_int_distribution<> 
 			groceryCounts,
 			arrivalTimes;
 		std::string laneName;
