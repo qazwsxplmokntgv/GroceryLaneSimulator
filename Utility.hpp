@@ -76,7 +76,7 @@ namespace utility {
 	//returns a timestamp week.day|hour:minute
 	std::string getTimeStamp(int minute);
 
-	int getNumericalInput(void);
+	int getNumericInput(void);
 
 	laneAttributeSet getLaneAttributeInput(void);
 

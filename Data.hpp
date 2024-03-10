@@ -8,11 +8,8 @@
 class Data {
 public:
 	//constructors
-	//serviceTime is initialized based on groceryCount
-	//totalTime is initialized to be equal to service time
-	//groceries is initialized to a list of random groceries of groceryCount size
 	Data(mt19937& rng, int _customerNumber = 0, int groceryCount = 0);
-	Data(int _customerNumber = 0, int _serviceTime = 0, int _totalTime = 0, List _groceries = List()) : customerNumber(_customerNumber), serviceTime(_serviceTime), totalTime(_totalTime), groceries(_groceries) {}
+	Data(int _customerNumber = 0, int groceryCount = 0); //'fake' grocery list for performance when actual items are never actually displayed
 	Data(const Data& copy);
 	//assignment
 	Data& operator=(const Data& copy);
@@ -21,6 +18,7 @@ public:
 
 	//finds and sets service time based on grocery count
 	void calculateServiceTime();
+	void calculateServiceTime(int groceryCount);
 
 	string arrivalMessage() const;
 	string departureMessage() const;

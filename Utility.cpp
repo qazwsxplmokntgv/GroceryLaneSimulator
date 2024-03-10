@@ -30,7 +30,7 @@ namespace utility {
 			+ "]";
 	}
 
-	int getNumericalInput(void)
+	int getNumericInput(void)
 	{
 		int out;
 		while (!std::isdigit(std::cin.peek())) std::cin.ignore(1);
@@ -43,13 +43,13 @@ namespace utility {
 		int maxGroc = 0, maxArrv = 0;
 		std::cout << "\nEnter New Lane Type Information:\n";
 		std::cout << "\tMin Grocery Count: ";
-		int minGroc = utility::getNumericalInput();
+		int minGroc = utility::getNumericInput();
 		std::cout << "\tMax Grocery Count: ";
-		while (maxGroc < minGroc) maxGroc = utility::getNumericalInput();
+		while (maxGroc < minGroc) maxGroc = utility::getNumericInput();
 		std::cout << "\tMin Arrival Interval: ";
-		int minArrv = utility::getNumericalInput();
+		int minArrv = utility::getNumericInput();
 		std::cout << "\tMax Arrival Interval: ";
-		while (maxArrv < minArrv) maxArrv = utility::getNumericalInput();
+		while (maxArrv < minArrv) maxArrv = utility::getNumericInput();
 		std::cout << "\t4 Letter Lane Code: ";
 		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 		while (std::cin.peek() < 0) std::cin.ignore(1);

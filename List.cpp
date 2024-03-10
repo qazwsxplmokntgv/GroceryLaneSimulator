@@ -39,9 +39,17 @@ List& List::operator=(const List& copy)
 }
 
 List::~List()
-{
-	if (!isEmpty()) 
-		delete pHead;
+{	//recursive or iterative deletion based on list size
+	if (size < 100) delete pHead;
+	else {
+		while (!isEmpty()) {
+			Node<string>* toDel = pHead;
+			pHead = pHead->getNext();
+			toDel->setNext(nullptr);
+			delete toDel;
+		}
+		pTail = nullptr;
+	}
 }
 
 void List::populateWithGroceries(int groceryCount, mt19937& rng)

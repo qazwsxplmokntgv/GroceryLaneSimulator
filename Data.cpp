@@ -8,6 +8,14 @@ Data::Data(mt19937& rng, int _customerNumber, int groceryCount)
 	this->totalTime = 0;
 }
 
+Data::Data(int _customerNumber, int groceryCount)
+{
+	this->customerNumber = _customerNumber;
+	this->groceries = List();
+	this->calculateServiceTime(groceryCount);
+	this->totalTime = 0;
+}
+
 Data::Data(const Data& copy)
 {
 	this->customerNumber = copy.customerNumber;
@@ -31,6 +39,12 @@ void Data::calculateServiceTime()
 {
 	const int groceriesPerMinute = 8;
 	serviceTime = (int)ceil((double)groceries.getSize() / groceriesPerMinute);
+}
+
+void Data::calculateServiceTime(int groceryCount)
+{
+	const int groceriesPerMinute = 8;
+	serviceTime = (int)ceil((double)groceryCount / groceriesPerMinute);
 }
 
 string Data::arrivalMessage() const
