@@ -59,6 +59,8 @@ int main(void) {
 		}
 	} };
 
+	for (std::vector<std::string>& optList : menuOpts) optList.shrink_to_fit();
+
 	//current user menu selection
 	int currentSelection = 1;
 
@@ -178,8 +180,8 @@ int main(void) {
 								<< std::setw(2) << std::setfill('0') << (double)settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].groceryCounts.param()._Min << "-"
 								<< std::setw(2) << std::setfill('0') << (double)settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].groceryCounts.param()._Max << "]"
 								<< std::setw(2) << std::setfill(' ') << " | Arrival Times: ["
-								<< std::setw(2) << std::setfill('0') << std::ceil((double)settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].arrivalTimes.param()._Min * 100 / settings.inputUnits) / 100 << "-"
-								<< std::setw(2) << std::setfill('0') << std::ceil((double)settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].arrivalTimes.param()._Max * 100 / settings.inputUnits) / 100 << "]\n";
+								<< std::setw(2) << std::setfill('0') << std::ceil((double)settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].arrivalTimes.param()._Min * 100 /*/ settings.inputUnits*/) / 100 << "-" //currently undecided on converting units here
+								<< std::setw(2) << std::setfill('0') << std::ceil((double)settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].arrivalTimes.param()._Max * 100 /*/ settings.inputUnits*/) / 100 << "]\n";
 						}
 						else { //print back option
 							std::cout << menuOpts[3][static_cast<std::vector<std::string, std::allocator<std::string>>::size_type>(utility::laneAttMenu) - 1];
@@ -325,10 +327,12 @@ int main(void) {
 				break;
 			case 2: //delete lane type
 				if (settings.laneTypeCount == 0) break;
-
-				std::cout << "Enter a number 1-" << settings.laneTypeCount << " to delete: ";
 				{
-					int typeToDelete = utility::getNumericalInput() - 1;
+					int typeToDelete = 0;
+					if (settings.laneTypeCount > 1) {
+						std::cout << "Select a number 1-" << settings.laneTypeCount << " to delete: ";
+						typeToDelete = utility::getNumericalInput() - 1;
+					}
 					settings.laneTypeAttributes.erase(settings.laneTypeAttributes.begin() + typeToDelete);
 					settings.laneCounts.erase(settings.laneCounts.begin() + typeToDelete);
 				}

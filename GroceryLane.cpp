@@ -119,7 +119,10 @@ void GroceryLane::runSim(unsigned int minuteTotal, utility::simulationSettings s
 			if (lanes[j].currentNextArrivalTime == 0) {
 
 				//constructs new customer 
-				Data newCust(rng, ++customersServed, lanes[j].possibleGroceryCountRange(rng));
+				Data newCust;
+				if (settings.showGroceryLists)newCust = Data(rng, ++customersServed, lanes[j].possibleGroceryCountRange(rng));
+				//uses a fake grocery list if a real one is not necessary, to save resources
+				else newCust = Data(++customersServed, lanes[j].possibleGroceryCountRange(rng));
 
 				//if this customer will immediately check out upon arrival in lane, notes how long they will be checking out
 				if (lanes[j].custQueue.isEmpty()) 
