@@ -8,8 +8,8 @@
 class Data {
 public:
 	//constructors
-	Data(mt19937& rng, int _customerNumber = 0, int groceryCount = 0);
-	Data(int _customerNumber = 0, int groceryCount = 0); //'fake' grocery list for performance when actual items are never actually displayed
+	Data(mt19937& rng, int _customerNumber = 0, int _groceryCount = 0);
+	Data(int _customerNumber = 0, int _groceryCount = 0); //'fake' grocery list for performance when actual items are never actually displayed
 	Data(const Data& copy);
 	//assignment
 	Data& operator=(const Data& copy);
@@ -35,7 +35,8 @@ public:
 private:
 	int customerNumber,
 		serviceTime,
-		totalTime;
+		totalTime,
+		groceryCount;
 	List groceries;
 };
 

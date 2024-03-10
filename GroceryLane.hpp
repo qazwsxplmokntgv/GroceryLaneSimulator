@@ -4,6 +4,7 @@
 #include "Data.hpp"
 #include "Queue.hpp"
 #include "Utility.hpp"
+#include <thread>
 using std::uniform_int_distribution;
 
 class GroceryLane {
@@ -19,6 +20,12 @@ public:
 	int getNextArrivalTime(void) const;
 
 	static void runSim(unsigned int minuteTotal, utility::simulationSettings settings, int laneTypeCount, std::vector<utility::laneAttributeSet> laneTypeAttributes);
+
+	void customerArrival(int& customersServed, std::mt19937& rng, const utility::simulationSettings settings, const int& minute);
+	void customerDeparture(int& customersServed, const utility::simulationSettings settings, const int& minute);
+	void decrementLaneTime(void);
+
+	void runLaneMinute(int& customersServed, std::mt19937& rng, const utility::simulationSettings settings, const int& minute);
 
 private:
 	//queue of customers currently present in lane
