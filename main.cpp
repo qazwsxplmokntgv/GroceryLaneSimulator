@@ -14,17 +14,19 @@
 */
 
 /* idea log / todo
-* separate lane creation to a new settings submenu with displays of all defined types, editing, and removal options
-* make norm and expr less hard coded in everything except for as defaults
+* add lane type deletion selection instead of only allowing the last one to be deleted
+* make the order between grocery counts and arrival times consistent across functions and menus
+* make lane attributes display align visually with eachother
+* make lane type edits work (back burner idea, for now they can just be displays)
 */
 
 int main(void) {
-	utility::SimulationSettings settings;
+	utility::simulationSettings settings;
 	
 	//current menu to display
 	utility::menu currentMenu = utility::mainMenu;
 
-	const int menuTypes = 3;
+	const int menuTypes = 4;
 	std::array<std::vector<std::string>, menuTypes> menuOpts{ {
 		{//main menu
 			". Run Simulation\n",
@@ -45,7 +47,7 @@ int main(void) {
 			". Queue Printout Interval        [", //9
 			". Input Units                    [", //10
 			//the last three settings options do not have current states to display as part of the menu and therefore do not need the space or the bracket
-			". Add Lane Type\n",                  //11
+			". Create & Edit Lanes\n",            //11
 			". Restore Default Settings\n",       //12
 			". Back\n"                            //13
 		},{//units menu
@@ -54,6 +56,11 @@ int main(void) {
 			". Days\n",
 			". Weeks\n",
 			". Back\n"
+		},{//lane atts menu
+			". Add New Lane Type\n",
+			". Delete Last Lane Type\n",
+			//all lanes and their attributes will be presented here, with editing options
+			". Back"
 		}
 	} };
 
@@ -76,20 +83,20 @@ int main(void) {
 				break;
 			case utility::settingsMenu:
 				{
-					const int totalSettingsCount = utility::settingsMenu + settings.laneTypeCount;
-					const int highestOptDigitCount = (int)(log10(totalSettingsCount) + 1);
+					const int totalOptCount = utility::settingsMenu + settings.laneTypeCount;
+					const int highestOptDigitCount = (int)(log10(totalOptCount) + 1);
 
-					for (int i = 0; i < totalSettingsCount; ++i) {
+					for (int i = 0; i < totalOptCount; ++i) {
 						//numbering and selection indicator
 						std::string optNum = std::to_string(i + 1);
 						std::cout << (currentSelection == (i + 1) ? "\033[1m > " : "\033[0m   ") << std::setw(static_cast<unsigned long long>(highestOptDigitCount) + 1 - optNum.size()) << std::setfill(' ') << optNum;
 
 						//print the option text
-						if (i < 8) 
-							std::cout << menuOpts[1][i]; //print the first 8 predefined options normally
-						else if (i < 8 + settings.laneTypeCount) 
-							std::cout << ". " << settings.laneTypeAttributes[static_cast<std::vector<utility::LaneAttributeSet, std::allocator<utility::LaneAttributeSet>>::size_type>(i) - 8].laneName << " Lane Count                [";
-						else 
+						if (i < 8) //print the first 8 predefined options normally
+							std::cout << menuOpts[1][i]; 
+						else if (i < 8 + settings.laneTypeCount) //generate each lane count option
+							std::cout << ". " << settings.laneTypeAttributes[static_cast<std::vector<utility::laneAttributeSet, std::allocator<utility::laneAttributeSet>>::size_type>(i) - 8].laneName << " Lane Count                [";
+						else //print the remaining options normally, with numbering adjusted appropriately
 							std::cout << menuOpts[1][static_cast<std::vector<std::string, std::allocator<std::string>>::size_type>(i) - settings.laneTypeCount];
 
 
@@ -156,9 +163,40 @@ int main(void) {
 				for (int i = 0; i < utility::timeUnitMenu; ++i) 
 					std::cout << (currentSelection == (i + 1) ? "\033[1m > " : "\033[0m   ") << (i + 1) << menuOpts[2][i];
 				break;
+			case utility::laneAttMenu:
+				{
+					const int totalOptCount = utility::laneAttMenu + settings.laneTypeCount;
+					const int highestOptDigitCount = (int)(log10(totalOptCount) + 1);
+
+					for (int i = 0; i < totalOptCount; ++i) {
+						//numbering and selection indicator
+						std::string optNum = std::to_string(i + 1);
+						std::cout << (currentSelection == (i + 1) ? "\033[1m > " : "\033[0m   ") << std::setw(static_cast<unsigned long long>(highestOptDigitCount) + 1 - optNum.size()) << std::setfill(' ') << optNum;
+
+						//print the option text
+						if (i < 2) //print the first 2 predefined options normally
+							std::cout << menuOpts[3][i]; 
+						else if (i < 2 + settings.laneTypeCount) //generate each edit option
+							std::cout << ". Edit " << settings.laneTypeAttributes[static_cast<std::vector<utility::laneAttributeSet, std::allocator<utility::laneAttributeSet>>::size_type>(i) - 2].laneName << " Attributes  -  Arrival Times: ["
+								<< std::ceil((double)settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].arrivalTimes.param()._Min * 100 / settings.inputUnits) / 100 << "-"
+								<< std::ceil((double)settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].arrivalTimes.param()._Max * 100 / settings.inputUnits) / 100 << "] | Grocery Counts: ["
+								<< (double)settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].groceryCounts.param()._Min << "-"
+								<< (double)settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].groceryCounts.param()._Max << "]\n";
+						else //print back option
+							std::cout << menuOpts[3][2];
+
+
+						//lanes attributes
+						if (i > 1 && i < 2 + settings.laneTypeCount) {
+							
+						}
+					}
+				}
+				break;
 			}
+
 			//interprets user menu navigation inputs to determine a selected action to perform below
-			currentSelection = utility::menuNav(currentSelection, currentMenu + (currentMenu == utility::settingsMenu ? settings.laneTypeCount : 0), stayInMenu);
+			currentSelection = utility::menuNav(currentSelection, currentMenu + (currentMenu == utility::settingsMenu || currentMenu == utility::laneAttMenu ? settings.laneTypeCount : 0), stayInMenu);
 		}
 
 		//acts on user selection
@@ -249,43 +287,12 @@ int main(void) {
 				currentSelection = settings.inputUnits == utility::minute ? 1 : settings.inputUnits == utility::hour ? 2 : settings.inputUnits == utility::day ? 3 : 4;
 				break;
 			}
-			if (currentSelection == 12 + settings.laneTypeCount) { //add new user defined lane type
-				int maxGroc = 0, maxArrv = 0;
-				std::cout << "\nEnter New Lane Type Information:\n";
-				std::cout << "\tMin Grocery Count: ";
-				int minGroc = utility::getNumericalInput();
-				std::cout << "\tMax Grocery Count: ";
-				while (maxGroc < minGroc) maxGroc = utility::getNumericalInput();
-				std::cout << "\tMin Arrival Interval: ";
-				int minArrv = utility::getNumericalInput();
-				std::cout << "\tMax Arrival Interval: ";
-				while (maxArrv < minArrv) maxArrv = utility::getNumericalInput();
-				std::cout << "\t4 Letter Lane Code: ";
-				std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-				while (std::cin.peek() < 0) std::cin.ignore(1);
-				char code[5];
-				std::cin.readsome(code, 4);
-				code[4] = '\0';
-				settings.laneTypeAttributes.push_back({ std::uniform_int_distribution<>(minGroc, maxGroc), std::uniform_int_distribution<>(minArrv, maxArrv), code });
-				settings.laneCounts.push_back(1);
-				++settings.laneTypeCount;
-				++currentSelection;
-				break;
+			if (currentSelection == 12 + settings.laneTypeCount) { //add, edit, or delete lane types
+				currentMenu = utility::laneAttMenu;
+				currentSelection = 1;
 			}
 			if (currentSelection == 13 + settings.laneTypeCount) { //reset settings to defaults
-				settings.showGroceryLists = false;
-				settings.includeQueuePrints = settings.includeArrivalsAndDepartures = true;
-				settings.onlyPrintFinalQueues = false;
-				settings.trackWorstTimes = true;
-				settings.pauseOnQueue = settings.clearOnQueue = false;
-				settings.measureExecutionTime = true;
-				settings.recycleIDInterval = 1440;
-				settings.queuePrintInterval = 10;
-				settings.laneTypeCount = 2;
-				settings.laneCounts.resize(settings.laneTypeCount);
-				settings.laneCounts[0] = settings.laneCounts[1] = 1;
-				settings.inputUnits = utility::minute;
-				settings.laneTypeAttributes.resize(settings.laneTypeCount);
+				utility::reset(settings);
 				currentSelection = 15;
 				break;
 			}
@@ -314,6 +321,31 @@ int main(void) {
 			}
 			currentMenu = utility::settingsMenu;
 			currentSelection = 13; //input change menu option in settings menu - where user last was before moving to submenu
+			break;
+		case utility::laneAttMenu:
+			switch (currentSelection) {
+			case 1: //add lane type
+				settings.laneTypeAttributes.push_back(utility::getLaneAttributeInput());
+				settings.laneCounts.push_back(1);
+				++settings.laneTypeCount;
+				break;
+			case 2: //delete lane type
+				settings.laneTypeAttributes.pop_back(); //currently can only delete the last lane type
+				settings.laneCounts.pop_back();
+				--settings.laneTypeCount;
+				break;
+			default:
+				if (currentSelection != utility::laneAttMenu + settings.laneTypeCount) {
+					std::cout << "\n\nEDITING NOT CURRENTLY AVAILABLE\n\n";
+					utility::pause();
+					//settings.laneTypeAttributes[static_cast<std::vector<utility::laneAttributeSet, std::allocator<utility::laneAttributeSet>>::size_type>(currentSelection) - 2] = utility::getLaneAttributeInput();
+				}
+				else { //back
+					currentMenu = utility::settingsMenu;
+					currentSelection = 12 + settings.laneTypeCount; //lane atts option in settings menu
+				}
+				break;
+			}
 			break;
 		}
 	}

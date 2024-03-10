@@ -64,13 +64,13 @@ void TestQueue::testRunSim(void)
 {
 	cout << "24 HOUR GROCERY LANE SIM:\n";
 
-	utility::SimulationSettings settings;
+	utility::simulationSettings settings;
 
 	int laneTypeCount = 2;
 
-	std::vector<utility::LaneAttributeSet> laneTypeAttributes = {
-		utility::LaneAttributeSet{ uniform_int_distribution<>(1, 35), uniform_int_distribution<>(1, 5), "EXPR" }, //express
-		utility::LaneAttributeSet{ uniform_int_distribution<>(20, 60), uniform_int_distribution<>(3, 8), "NORM"}  //normal
+	std::vector<utility::laneAttributeSet> laneTypeAttributes = {
+		utility::laneAttributeSet{ uniform_int_distribution<>(1, 35), uniform_int_distribution<>(1, 5), "EXPR" }, //express
+		utility::laneAttributeSet{ uniform_int_distribution<>(20, 60), uniform_int_distribution<>(3, 8), "NORM"}  //normal
 	};
 
 	//24 hours with default settings
