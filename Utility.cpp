@@ -95,7 +95,7 @@ namespace utility {
 			"                               |___/\n";
 	}
 
-	int menuNav(int currentSelection, int menuOpts, bool& stayInMenu)
+	int menuNav(int& currentSelection, int menuOpts, bool& stayInMenu)
 	{
 		//getting user input for menu nav
 		bool gettingInput = true,
@@ -132,6 +132,132 @@ namespace utility {
 				continue;
 			}
 			gettingInput = false;
+		}
+		return currentSelection;
+	}
+
+	int runMenu(int& currentSelection, menu& currentMenu, const simulationSettings& settings, const std::array<std::vector<std::string>, menuTypes>& menuOpts)
+	{
+		bool stayInMenu = true;
+		//visual portion of the menu - displaying options to the user and allowing them to navigate between them
+		while (stayInMenu) {
+			clearScreen();
+
+			printMenuHeader();
+
+			//menu printouts
+			switch (currentMenu) {
+			case mainMenu: //menus with constant numbers of opts
+			case timeUnitMenu:
+				for (int i = 0; i < menuSizes[currentMenu]; ++i)
+					std::cout << (currentSelection == (i + 1) ? "\033[1m > " : "\033[0m   ") << (i + 1) << menuOpts[currentMenu][i];
+				break;
+			case settingsMenu:
+			case laneAttMenu:
+				{
+					const int totalOptCount = menuSizes[currentMenu] + settings.laneTypeCount;
+					const int highestOptDigitCount = (int)(log10(totalOptCount) + 1);
+
+					for (int i = 0; i < totalOptCount; ++i) {
+						//numbering and selection indicator
+						std::string optNum = std::to_string(i + 1);
+						std::cout << (currentSelection == (i + 1) ? "\033[1m > " : "\033[0m   ") << std::setw(static_cast<unsigned long long>(highestOptDigitCount) + 1 - optNum.size()) << std::setfill(' ') << optNum;
+						
+						if (currentMenu == settingsMenu) {
+							//print the option text
+							if (i < 8) //print the first 8 predefined options normally
+								std::cout << menuOpts[settingsMenu][i];
+							else if (i < 8 + settings.laneTypeCount) //assemble each lane count option
+								std::cout << ". " << settings.laneTypeAttributes[static_cast<std::vector<laneAttributeSet, std::allocator<laneAttributeSet>>::size_type>(i) - 8].laneName << " Lane Count                [";
+							else //print the remaining options
+								std::cout << menuOpts[settingsMenu][static_cast<std::vector<std::string, std::allocator<std::string>>::size_type>(i) - settings.laneTypeCount];
+							//print the state of applicable options
+							//settings dependent on the states of others are locked and marked as such when said others override them
+							switch (i) {
+							case 0: //first 8 options (all toggles)
+								std::cout
+									<< (settings.includeQueuePrints && !settings.onlyPrintFinalQueues ? "TRUE" : "FALSE") << "]\t" //status
+									<< (settings.onlyPrintFinalQueues ? "[LOCKED BY 4]" : "") << "\n"; //locked indicator
+								break;
+							case 1:
+								std::cout
+									<< (settings.includeArrivalsAndDepartures && !settings.onlyPrintFinalQueues ? "TRUE" : "FALSE") << "]\t"
+									<< (settings.onlyPrintFinalQueues ? "[LOCKED BY 4]" : "") << "\n";
+								break;
+							case 2:
+								std::cout
+									<< (settings.showGroceryLists && settings.includeArrivalsAndDepartures && !settings.onlyPrintFinalQueues ? "TRUE" : "FALSE") << "]\t"
+									<< (settings.onlyPrintFinalQueues ? "[LOCKED BY 4]" : !settings.includeArrivalsAndDepartures ? "[LOCKED BY 2]" : "") << "\n";
+								break;
+							case 3:
+								std::cout
+									<< (settings.onlyPrintFinalQueues ? "TRUE" : "FALSE") << "]\n";
+								break;
+							case 4:
+								std::cout
+									<< (settings.trackWorstTimes ? "TRUE" : "FALSE") << "]\n";
+								break;
+							case 5:
+								std::cout
+									<< (settings.pauseOnQueue && settings.includeQueuePrints && !settings.onlyPrintFinalQueues ? "TRUE" : "FALSE")
+									<< "]\t" << (settings.onlyPrintFinalQueues ? "[LOCKED BY 4]" : !settings.includeQueuePrints ? "[LOCKED BY 1] " : "") << "\n";
+								break;
+							case 6:
+								std::cout
+									<< (settings.clearOnQueue && settings.includeQueuePrints && !settings.onlyPrintFinalQueues ? "TRUE" : "FALSE")
+									<< "]\t" << (settings.onlyPrintFinalQueues ? "[LOCKED BY 4]" : !settings.includeQueuePrints ? "[LOCKED BY 1] " : "") << "\n";
+								break;
+							case 7:
+								std::cout
+									<< (settings.measureExecutionTime ? "TRUE" : "FALSE") << "]\n";
+								break;
+							default: //remaining options - lane counts or the three options following them
+								switch (i - settings.laneTypeCount) {
+								default: //lane counts
+									std::cout << settings.laneCounts[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 8] << "]\n";
+									break;
+								case 8: //recycle id interval
+									std::cout << ((double)settings.recycleIDInterval) / settings.inputUnits << "]\n";
+									break;
+								case 9: //queue print interval
+									std::cout << ((double)settings.queuePrintInterval) / settings.inputUnits << "]\n";
+									break;
+								case 10: //input units
+									std::cout << (getUnits(settings.inputUnits, true)) << "]\n";
+									break;
+								case 11:
+								case 12:
+								case 13: //stateless options
+									break;
+								}
+							}
+						}
+						else {
+							//print the option text
+							if (i < 2) //print the first 2 predefined options normally
+								std::cout << menuOpts[laneAttMenu][i];
+							else if (i < 2 + settings.laneTypeCount) {
+								//generate each edit option
+								std::cout << ". Edit " << settings.laneTypeAttributes[static_cast<std::vector<laneAttributeSet, std::allocator<laneAttributeSet>>::size_type>(i) - 2].laneName
+									<< " Attributes  -  Grocery Counts: ["
+									<< std::setw(2) << std::setfill('0') << (double)settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].groceryCounts.param()._Min << "-"
+									<< std::setw(2) << std::setfill('0') << (double)settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].groceryCounts.param()._Max << "]"
+									<< std::setw(2) << std::setfill(' ') << " | Arrival Times: ["
+									<< std::setw(2) << std::setfill('0') << std::ceil((double)settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].arrivalTimes.param()._Min * 100 /*/ settings.inputUnits*/) / 100 << "-" //currently undecided on converting units here
+									<< std::setw(2) << std::setfill('0') << std::ceil((double)settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].arrivalTimes.param()._Max * 100 /*/ settings.inputUnits*/) / 100 << "]\n";
+							}
+							else { //print back option
+								std::cout << menuOpts[laneAttMenu][static_cast<std::vector<std::string, std::allocator<std::string>>::size_type>(menuSizes[laneAttMenu]) - 1];
+							}
+						}
+					}
+					break;
+				}
+			}
+			//interprets user menu navigation inputs
+			//will either update the menu or proceed below
+			//param 2 is the size of current menu plus any options generated based on number of lane types
+			menuNav(currentSelection, menuSizes[currentMenu] + (currentMenu == settingsMenu || currentMenu == laneAttMenu ? settings.laneTypeCount : 0), stayInMenu);
 		}
 		return currentSelection;
 	}
