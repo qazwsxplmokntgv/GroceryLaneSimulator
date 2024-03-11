@@ -5,6 +5,7 @@
 #include <array>
 #include <chrono>
 #include <conio.h> //_getch() utilized in menuNav() & pause()
+#include <iomanip>
 #include <iostream>
 #include <random>
 #include <string>
@@ -25,11 +26,14 @@ namespace utility {
 			end;
 	};
 
+	const int menuTypes = 4;
+	const std::array<int, menuTypes> menuSizes = { 4, 14, 7, 3 };
+
 	enum menu { //underlying values == total opts (excluding non-predefined opts)
-		mainMenu = 4,
-		settingsMenu = 14,
-		timeUnitMenu = 7,
-		laneAttMenu = 3
+		mainMenu,
+		settingsMenu,
+		timeUnitMenu,
+		laneAttMenu
 	};
 
 	enum timeUnit {
@@ -75,7 +79,7 @@ namespace utility {
 
 	simulationSettings reset(simulationSettings& settings);
 
-	//returns a timestamp week.day|hour:minute
+	//returns a timestamp year.month.day|hour:minute
 	std::string getTimeStamp(int minute);
 
 	std::string getUnits(timeUnit unit, bool asUpper);
@@ -89,7 +93,10 @@ namespace utility {
 
 	//interprets user menu navigation inputs
 	//returns any selections made by the user
-	int menuNav(int currentSelection, int menuOpts, bool& stayInMenu);
+	int menuNav(int& currentSelection, int menuOpts, bool& stayInMenu);
+
+	//continuously runs the menu until the user selects an option
+	int runMenu(int& currentSelection, menu& currentMenu, const simulationSettings& settings, const std::array<std::vector<std::string>, menuTypes>& menuOpts);
 
 	//gets a seed for use with rng engines based on current time
 	unsigned int getTimeSeed(void);
