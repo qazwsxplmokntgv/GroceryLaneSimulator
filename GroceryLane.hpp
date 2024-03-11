@@ -18,16 +18,17 @@ public:
 	void rollNewArrivalTime(mt19937& rng);
 
 	int getNextArrivalTime(void) const;
+	void setNextArrivalTime(int newArrivalTime);
 
-	static void runSim(unsigned int minuteTotal, utility::simulationSettings settings, int laneTypeCount, std::vector<utility::laneAttributeSet> laneTypeAttributes);
+	static void runSim(unsigned int minuteTotal, utility::simulationSettings& settings, int laneTypeCount, std::vector<utility::laneAttributeSet>& laneTypeAttributes);
 
-	void customerArrival(int& customersServed, std::mt19937& rng, const utility::simulationSettings& settings, const int minute);
-	void customerDeparture(const utility::simulationSettings& settings, const int minute);
+	void customerArrival(unsigned int& customersServed, std::mt19937& rng, const utility::simulationSettings& settings, const unsigned int minute);
+	void customerDeparture(const utility::simulationSettings& settings, const unsigned int minute);
 	void decrementLaneTime(void);
 
-	void runLaneMinute(int& customersServed, std::mt19937& rng, const utility::simulationSettings& settings, const int minute);
+	void runLaneMinute(unsigned int& customersServed, std::mt19937& rng, const utility::simulationSettings& settings, const unsigned int minute);
 
-	void printQueueWithHeader(const int minute) const;
+	void printQueueWithHeader(const unsigned int minute) const;
 private:
 	//queue of customers currently present in lane
 	Queue<Data> custQueue;

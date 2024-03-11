@@ -67,7 +67,6 @@ int main(void) {
 
 	for (std::vector<std::string>& optList : menuOpts) optList.shrink_to_fit();
 
-
 	//program continues to run until the user selects exit from the main menu (mainMenu opt #4)
 	while (true) {
 		//continuously runs the menu until the user selects an option
@@ -200,6 +199,7 @@ int main(void) {
 						std::cout << "Select a number 1-" << settings.laneTypeCount << " to delete: ";
 						typeToDelete = utility::getNumericInput() - 1;
 					}
+					if (typeToDelete > settings.laneTypeCount) break;
 					settings.laneTypeAttributes.erase(settings.laneTypeAttributes.begin() + typeToDelete);
 					settings.laneCounts.erase(settings.laneCounts.begin() + typeToDelete);
 				}
@@ -207,7 +207,7 @@ int main(void) {
 				break;
 			default:
 				if (currentSelection != utility::menuSizes[utility::laneAttMenu] + settings.laneTypeCount) { //edit
-					settings.laneTypeAttributes.insert(settings.laneTypeAttributes.erase(settings.laneTypeAttributes.begin() + (currentSelection - 3)), utility::getLaneAttributeInput());
+					settings.laneTypeAttributes[static_cast<std::vector<utility::laneAttributeSet, std::allocator<utility::laneAttributeSet>>::size_type>(currentSelection) - 3] = utility::getLaneAttributeInput();
 				}
 				else { //back
 					settings.laneCounts.shrink_to_fit();
