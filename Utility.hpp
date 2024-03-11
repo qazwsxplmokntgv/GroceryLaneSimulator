@@ -9,6 +9,7 @@
 #include <iostream>
 #include <random>
 #include <string>
+#include <sstream>
 #include <vector>
 
 namespace utility {
@@ -89,7 +90,7 @@ namespace utility {
 	laneAttributeSet getLaneAttributeInput(void);
 
 	//prints control info and title
-	void printMenuHeader(void);
+	void printMenuHeader(std::ostream& out);
 
 	//interprets user menu navigation inputs
 	//returns any selections made by the user

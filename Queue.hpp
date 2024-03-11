@@ -148,7 +148,7 @@ inline void Queue<T>::printQueue(const Node<T>* const startNode) const
 	//if queue end is reached
 	if (startNode == nullptr) return;
 	//prints data
-	std::cout << "\t    " << startNode->getData() << std::endl;
+	std::cout << "\t    " << startNode->getData() << '\n';
 	//recursive call
 	printQueue(startNode->getNext());
 }

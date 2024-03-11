@@ -120,7 +120,7 @@ void GroceryLane::runSim(unsigned int minuteTotal, utility::simulationSettings& 
 		//if queue prints are enabled, print each lane's queue
 		if (settings.includeQueuePrints && settings.queuePrintInterval && !(minute % settings.queuePrintInterval)) {
 			std::for_each(lanes.begin(), lanes.end(), [minute](GroceryLane& lane) { lane.printQueueWithHeader(minute); });
-			std::cout << std::endl;
+			std::cout << '\n';
 			if (settings.pauseOnQueue) utility::pause();
 			if (settings.clearOnQueue) utility::clearScreen();
 		}
@@ -140,15 +140,13 @@ void GroceryLane::runSim(unsigned int minuteTotal, utility::simulationSettings& 
 	for (int laneIdx = 0; settings.trackWorstTimes && laneIdx < laneCount; ++laneIdx) {
 		std::cout 
 			<< lanes[laneIdx].laneName << " Highest Total Time - " << std::setw(3) << std::setfill(' ') << lanes[laneIdx].worstTime.duration << " minutes: "
-			<< utility::getTimeStamp(lanes[laneIdx].worstTime.start) << "-" << utility::getTimeStamp(lanes[laneIdx].worstTime.end) << std::endl;
+			<< utility::getTimeStamp(lanes[laneIdx].worstTime.start) << "-" << utility::getTimeStamp(lanes[laneIdx].worstTime.end) << '\n';
 	}
-	std::cout << std::endl;
-
 	//stops execution timer
 	auto executionTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - simStart).count();
 	//execution time printout
 	//minutes:seconds:milliseconds
-	if (settings.measureExecutionTime) std::cout << "Execution Time: [" << std::setw(2) << std::setfill('0') << executionTime / 60000 << ":" << std::setw(2) << std::setfill('0') << (executionTime % 60000) / 1000 << ":" << std::setw(4) << std::setfill('0') << executionTime % 1000 << "]\n";
+	if (settings.measureExecutionTime) std::cout << "\nExecution Time: [" << std::setw(2) << std::setfill('0') << executionTime / 60000 << ":" << std::setw(2) << std::setfill('0') << (executionTime % 60000) / 1000 << ":" << std::setw(4) << std::setfill('0') << executionTime % 1000 << "]" << std::endl;
 }
 
 void GroceryLane::customerArrival(unsigned int& customersServed, std::mt19937& rng, const utility::simulationSettings& settings, const unsigned int minute)
@@ -183,7 +181,7 @@ void GroceryLane::customerArrival(unsigned int& customersServed, std::mt19937& r
 		std::cout << utility::getTimeStamp(minute) << " " << this->laneName << ": " << newCust.arrivalMessage();
 		if (settings.showGroceryLists) {
 			//displays the new customer's groceries
-			std::cout << newCust.getGroceries().listToString() << std::endl;
+			std::cout << newCust.getGroceries().listToString() << '\n';
 		}
 	}
 
@@ -235,7 +233,7 @@ void GroceryLane::runLaneMinute(unsigned int& customersServed, std::mt19937& rng
 void GroceryLane::printQueueWithHeader(const unsigned int minute) const
 {
 	//header
-	std::cout << std::endl << utility::getTimeStamp(minute) << " " << this->laneName << " QUEUE:\n";
+	std::cout << '\n' << utility::getTimeStamp(minute) << " " << this->laneName << " QUEUE:\n";
 	//queue
 	this->custQueue.printQueue();
 }
