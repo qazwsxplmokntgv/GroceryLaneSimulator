@@ -91,6 +91,7 @@ void GroceryLane::runSim(unsigned int minuteTotal, utility::simulationSettings s
 	//trims vector size after lane creation is complete
 	lanes.shrink_to_fit();
 
+
 	if (!lanes.empty()) { //if there are lanes
 		//time until the first customer arrives in any lane
 		int minutesUntilFirstArrival = lanes[0].currentNextArrivalTime; 
@@ -102,7 +103,8 @@ void GroceryLane::runSim(unsigned int minuteTotal, utility::simulationSettings s
 	if (settings.onlyPrintFinalQueues) { //disables non-final printouts 
 		settings.includeArrivalsAndDepartures = settings.includeQueuePrints = false;
 		std::cout << "Simulating"; //prints message to indicate the program running in the absence of in-progress printouts
-	} //avoids having to check redundant conditions during the main loop of the simulation
+	} 
+	//avoids having to check redundant conditions during the main loop of the simulation
 	else if (settings.queuePrintInterval == 0) settings.includeQueuePrints = false;
 
 	unsigned int customersServed = 0;
