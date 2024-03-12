@@ -144,16 +144,22 @@ int main(void) {
 					switch (settings.inputUnits) {
 					case utility::minute:
 						currentSelection = 1;
+						break;
 					case utility::hour:
 						currentSelection = 2;
+						break;
 					case utility::day:
 						currentSelection = 3;
+						break;
 					case utility::week:
 						currentSelection = 4;
+						break;
 					case utility::month:
 						currentSelection = 5;
+						break;
 					case utility::year:
 						currentSelection = 6;
+						break;
 					}
 					break;
 				case 12: //add, edit, or delete lane types
@@ -211,8 +217,8 @@ int main(void) {
 					if (settings.laneTypeCount > 1) {
 						std::cout << "Select a number 1-" << settings.laneTypeCount << " to delete: ";
 						typeToDelete = utility::getNumericInput() - 1;
+						if (typeToDelete > settings.laneTypeCount) break;
 					}
-					if (typeToDelete > settings.laneTypeCount) break;
 					settings.laneTypeAttributes.erase(settings.laneTypeAttributes.begin() + typeToDelete);
 					settings.laneCounts.erase(settings.laneCounts.begin() + typeToDelete);
 				}

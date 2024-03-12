@@ -49,7 +49,7 @@ void GroceryLane::setNextArrivalTime(int newArrivalTime)
 	this->currentNextArrivalTime = newArrivalTime;
 }
 
-void GroceryLane::runSim(unsigned int minuteTotal, utility::simulationSettings& settings, int laneTypeCount, std::vector<utility::laneAttributeSet>& laneAttributes)
+void GroceryLane::runSim(unsigned int minuteTotal, utility::simulationSettings settings, int laneTypeCount, std::vector<utility::laneAttributeSet>& laneAttributes)
 {
 	//starts execution timer
 	auto simStart = std::chrono::steady_clock::now();
