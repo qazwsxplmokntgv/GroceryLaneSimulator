@@ -206,6 +206,7 @@ void GroceryLane::customerDeparture(const utility::simulationSettings& settings,
 	if (settings.includeArrivalsAndDepartures) {  //anounces departure
 		std::string out(utility::getTimeStamp(minute));
 		out.reserve(72);
+		out.push_back(' ');
 		out.append(this->laneName);
 		out.append(": ");
 		out.append(departingCust.departureMessage());
