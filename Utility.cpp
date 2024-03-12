@@ -157,8 +157,13 @@ namespace utility {
 			case mainMenu: //menus with constant numbers of opts
 			case timeUnitMenu:
 				for (int i = 0; i < menuSizes[currentMenu]; ++i) {
-					std::string out = (currentSelection == (i + 1) ? "\033[1m > " : "\033[0m   ");
+					std::string out;
+					out.reserve(32); //prereserves out to avoid realloc
+					//selection indicator
+					out += (currentSelection == (i + 1) ? "\033[1m > " : "\033[0m   ");
+					//numbering
 					out.append(std::to_string(i + 1));
+					//actual option text
 					std::cout << out.append(menuOpts[currentMenu][i]);
 				}
 				break;
@@ -169,123 +174,119 @@ namespace utility {
 					const int highestOptDigitCount = (int)(log10(totalOptCount) + 1);
 
 					for (int i = 0; i < totalOptCount; ++i) {
-						//numbering and selection indicator
 						std::string optNum = std::to_string(i + 1);
-						std::string out = (currentSelection == (i + 1) ? "\033[1m > " : "\033[0m   ");
-						out.reserve(96);
+						std::string out;
+						out.reserve(96); //prereserves out to avoid realloc
+						//selection indicator
+						out += (currentSelection == (i + 1) ? "\033[1m > " : "\033[0m   ");
+						//adds leading space to right align numbers
 						for (int j = 0; j <= highestOptDigitCount - optNum.size(); ++j) out.push_back(' ');
+						//numbering
 						out.append(optNum);
 						
-						if (currentMenu == settingsMenu) {
+						switch (currentMenu) {
+						case settingsMenu:
 							//print the option text
 							if (i < 8) { //print the first 8 predefined options normally
 								out += menuOpts[settingsMenu][i];
+								switch (i) { 
+								case 0: //first 8 option states (all toggles)
+									out += (settings.includeQueuePrints && !settings.onlyPrintFinalQueues ? "TRUE]\t" : "FALSE]\t"); //status
+									if (settings.onlyPrintFinalQueues) out += "[LOCKED BY 4]\n"; //locked indicator - shows that another setting is overriding this one
+									else out.push_back('\n');
+									break;
+								case 1:
+									out += (settings.includeArrivalsAndDepartures && !settings.onlyPrintFinalQueues ? "TRUE]\t" : "FALSE]\t");
+									if (settings.onlyPrintFinalQueues) out += "[LOCKED BY 4]\n";
+									else out.push_back('\n');
+									break;
+								case 2:
+									out += (settings.showGroceryLists && settings.includeArrivalsAndDepartures && !settings.onlyPrintFinalQueues ? "TRUE]\t" : "FALSE]\t");
+									if (settings.onlyPrintFinalQueues) out += "[LOCKED BY 4]\n";
+									else if (!settings.includeArrivalsAndDepartures) out += "[LOCKED BY 2]\n";
+									else out.push_back('\n');
+									break;
+								case 3:
+									out += (settings.onlyPrintFinalQueues ? "TRUE]\n" : "FALSE]\n");
+									break;
+								case 4:
+									out += (settings.trackWorstTimes ? "TRUE]\n" : "FALSE]\n");
+									break;
+								case 5:
+									out += (settings.pauseOnQueue && settings.includeQueuePrints && !settings.onlyPrintFinalQueues ? "TRUE]\t" : "FALSE]\t");
+									if (settings.onlyPrintFinalQueues) out += "[LOCKED BY 4]\n";
+									else if (!settings.includeQueuePrints) out += "[LOCKED BY 1]\n";
+									else out.push_back('\n');
+									break;
+								case 6:
+									out += (settings.clearOnQueue && settings.includeQueuePrints && !settings.onlyPrintFinalQueues ? "TRUE]\t" : "FALSE]\t");
+									if (settings.onlyPrintFinalQueues) out += "[LOCKED BY 4]\n";
+									else if (!settings.includeQueuePrints) out += "[LOCKED BY 1]\n";
+									else out.push_back('\n');
+									break;
+								case 7:
+									out += (settings.measureExecutionTime ? "TRUE]\n" : "FALSE]\n");
+									break;
+								}
 							}
 							else if (i < 8 + settings.laneTypeCount) { //assemble each lane count option
 								out += ". ";
-								out += settings.laneTypeAttributes[static_cast<std::vector<laneAttributeSet, std::allocator<laneAttributeSet>>::size_type>(i) - 8].laneName;
+								out += settings.laneTypeAttributes[(size_t)i - 8].laneName;
 								out += " Lane Count                [";
+								out += std::to_string(settings.laneCounts[(size_t)i - 8]);
+								out += "]\n";
 							}
-							else //print the remaining options
-								out += menuOpts[settingsMenu][static_cast<std::vector<std::string, std::allocator<std::string>>::size_type>(i) - settings.laneTypeCount];
-
-							//appends the state of applicable options
-							//settings dependent on the states of others are locked and marked as such when said others override them
-							switch (i) {
-							case 0: //first 8 options (all toggles)
-								out += (settings.includeQueuePrints && !settings.onlyPrintFinalQueues ? "TRUE]\t" : "FALSE]\t"); //status
-								if (settings.onlyPrintFinalQueues) out += "[LOCKED BY 4]"; //locked indicator
-								out.push_back('\n');
-								break;
-							case 1:
-								out += (settings.includeArrivalsAndDepartures && !settings.onlyPrintFinalQueues ? "TRUE]\t" : "FALSE]\t");
-								if (settings.onlyPrintFinalQueues) out += "[LOCKED BY 4]";
-								out.push_back('\n');
-								break;
-							case 2:
-								out += (settings.showGroceryLists && settings.includeArrivalsAndDepartures && !settings.onlyPrintFinalQueues ? "TRUE]\t" : "FALSE]\t");
-								if (settings.onlyPrintFinalQueues) out += "[LOCKED BY 4]";
-								else if (!settings.includeArrivalsAndDepartures) out += "[LOCKED BY 2]";
-								out.push_back('\n');
-								break;
-							case 3:
-								out += (settings.onlyPrintFinalQueues ? "TRUE]\n" : "FALSE]\n");
-								break;
-							case 4:
-								out += (settings.trackWorstTimes ? "TRUE]\n" : "FALSE]\n");
-								break;
-							case 5:
-								out += (settings.pauseOnQueue && settings.includeQueuePrints && !settings.onlyPrintFinalQueues ? "TRUE]\t" : "FALSE]\t");
-								if (settings.onlyPrintFinalQueues) out += "[LOCKED BY 4]";
-								else if (!settings.includeQueuePrints) out += "[LOCKED BY 1]";
-								out.push_back('\n');
-								break;
-							case 6:
-								out += (settings.clearOnQueue && settings.includeQueuePrints && !settings.onlyPrintFinalQueues ? "TRUE]\t" : "FALSE]\t");
-								if (settings.onlyPrintFinalQueues) out += "[LOCKED BY 4]";
-								else if (!settings.includeQueuePrints) out += "[LOCKED BY 1]";
-								out.push_back('\n');
-								break;
-							case 7:
-								out += (settings.measureExecutionTime ? "TRUE]\n" : "FALSE]\n");
-								break;
-							default: //remaining options - lane counts or the three options following them
+							else { //print the remaining options
+								out += menuOpts[settingsMenu][(size_t)i - settings.laneTypeCount];
 								switch (i - settings.laneTypeCount) {
-								default: //lane counts
-									out += std::to_string(settings.laneCounts[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 8]);
-									out += "]\n";
-									break;
 								case 8: //recycle id interval
 									{
 										std::ostringstream ss;
 										ss << ((double)settings.recycleIDInterval) / settings.inputUnits;
 										out += ss.str();
+										out += "]\n";
 									}
-									out += "]\n";
 									break;
 								case 9: //queue print interval
 									{
 										std::ostringstream ss;
 										ss << ((double)settings.queuePrintInterval) / settings.inputUnits;
 										out += ss.str();
+										out += "]\n";
 									}
-									out += "]\n";
 									break;
 								case 10: //input units
 									out += (getUnits(settings.inputUnits, true));
 									out += "]\n";
 									break;
-								case 11:
-								case 12:
-								case 13: //stateless options
-									break;
 								}
 							}
-						}
-						else {
+							break;
+						case laneAttMenu:
 							//print the option text
 							if (i < 2) //print the first 2 predefined options normally
 								out += menuOpts[laneAttMenu][i];
 							else if (i < 2 + settings.laneTypeCount) {
 								//generate each edit option
 								out += ". Edit ";
-								out += settings.laneTypeAttributes[static_cast<std::vector<laneAttributeSet, std::allocator<laneAttributeSet>>::size_type>(i) - 2].laneName;
+								out += settings.laneTypeAttributes[(size_t)i - 2].laneName;
 								out += " Attributes  -  Grocery Counts: [";
-								out += std::to_string(settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].groceryCounts.param()._Min);
-								out.push_back('-');
-								out += std::to_string(settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].groceryCounts.param()._Max);
-								out.push_back(']');
-								out += " | Arrival Times: [";
-								out += std::to_string(settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].arrivalTimes.param()._Min);
-								out.push_back('-');
-								out += std::to_string(settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].arrivalTimes.param()._Max);
+								out += std::to_string(settings.laneTypeAttributes[(size_t)i - 2].groceryCounts.param()._Min);
+								out.push_back('-');								  
+								out += std::to_string(settings.laneTypeAttributes[(size_t)i - 2].groceryCounts.param()._Max);
+								out.push_back(']');								  
+								out += " | Arrival Times: [";					  
+								out += std::to_string(settings.laneTypeAttributes[(size_t)i - 2].arrivalTimes.param()._Min);
+								out.push_back('-');								  
+								out += std::to_string(settings.laneTypeAttributes[(size_t)i - 2].arrivalTimes.param()._Max);
 								out += "]\n";
 							}
 							else { //print back option
-								out += menuOpts[laneAttMenu][static_cast<std::vector<std::string, std::allocator<std::string>>::size_type>(menuSizes[laneAttMenu]) - 1];
+								out += menuOpts[laneAttMenu][(size_t)menuSizes[laneAttMenu] - 1];
 							}
+							break;
 						}
-						std::cout << out;
+						std::cout << out; //prints for settings or lane atts
 					}
 					break; //outermost switch (menus)
 				}

@@ -4,7 +4,7 @@
 /*
 *|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
 *| Written By:  Dylan Smith    |\\\\\\\\\\\\\\\\\\\\\\\\\\|
-*| Last Edited: 3/11/24        |//////////////////////////|
+*| Last Edited: 3/12/24        |//////////////////////////|
 *|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
 *| Grocery Lane Sim: Heavily user-customizable simulation |
 *| of various checkout lanes at a grocery store.          |
@@ -132,7 +132,7 @@ int main(void) {
 				switch (currentSelection - settings.laneTypeCount) {
 				default: //adjust counts of each type of lane, including custom lane types
 					std::cout << "\nEnter New Count: ";
-					settings.laneCounts[static_cast<std::vector<int, std::allocator<int>>::size_type>(currentSelection) - 9] = utility::getNumericInput();
+					settings.laneCounts[(size_t)currentSelection - 9] = utility::getNumericInput();
 					break;
 				case 9: //adjust ID recycle interval
 				case 10: //adjust queue print interval
@@ -141,7 +141,20 @@ int main(void) {
 					break;
 				case 11: //change unit that user input is interpreted as
 					currentMenu = utility::timeUnitMenu;
-					currentSelection = settings.inputUnits == utility::minute ? 1 : settings.inputUnits == utility::hour ? 2 : settings.inputUnits == utility::day ? 3 : settings.inputUnits == utility::week ? 4 : settings.inputUnits == utility::month ? 5 : 6;
+					switch (settings.inputUnits) {
+					case utility::minute:
+						currentSelection = 1;
+					case utility::hour:
+						currentSelection = 2;
+					case utility::day:
+						currentSelection = 3;
+					case utility::week:
+						currentSelection = 4;
+					case utility::month:
+						currentSelection = 5;
+					case utility::year:
+						currentSelection = 6;
+					}
 					break;
 				case 12: //add, edit, or delete lane types
 					currentMenu = utility::laneAttMenu;
@@ -207,7 +220,7 @@ int main(void) {
 				break;
 			default:
 				if (currentSelection != utility::menuSizes[utility::laneAttMenu] + settings.laneTypeCount) { //edit
-					settings.laneTypeAttributes[static_cast<std::vector<utility::laneAttributeSet, std::allocator<utility::laneAttributeSet>>::size_type>(currentSelection) - 3] = utility::getLaneAttributeInput();
+					settings.laneTypeAttributes[(size_t)currentSelection - 3] = utility::getLaneAttributeInput();
 				}
 				else { //back
 					settings.laneCounts.shrink_to_fit();
