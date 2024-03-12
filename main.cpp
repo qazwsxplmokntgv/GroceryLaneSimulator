@@ -4,7 +4,7 @@
 /*
 *|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
 *| Written By:  Dylan Smith    |\\\\\\\\\\\\\\\\\\\\\\\\\\|
-*| Last Edited: 3/10/24        |//////////////////////////|
+*| Last Edited: 3/11/24        |//////////////////////////|
 *|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
 *| Grocery Lane Sim: Heavily user-customizable simulation |
 *| of various checkout lanes at a grocery store.          |
@@ -13,7 +13,7 @@
 
 /* idea log / todo
 * fix crash when destructing extremely large queues
-* backburner - make attributes in the edit menu always visually aligned based on the largest value (currently using arbitrary 2 digit fill)
+* align values shown in edit menu
 */
 
 int main(void) {
@@ -137,7 +137,7 @@ int main(void) {
 				case 9: //adjust ID recycle interval
 				case 10: //adjust queue print interval
 					std::cout << "\nEnter New Interval: ";
-					(currentSelection - settings.laneTypeCount == 9 ? settings.recycleIDInterval : settings.queuePrintInterval) = utility::getNumericInput();
+					(currentSelection - settings.laneTypeCount == 9 ? settings.recycleIDInterval : settings.queuePrintInterval) = utility::getNumericInput() * settings.inputUnits;
 					break;
 				case 11: //change unit that user input is interpreted as
 					currentMenu = utility::timeUnitMenu;

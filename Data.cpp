@@ -53,12 +53,24 @@ void Data::calculateServiceTime(int groceryCount)
 
 string Data::arrivalMessage() const
 {
-	return "Customer " + std::string((6 - std::to_string(customerNumber).length()), '0') + std::to_string(customerNumber) + " arrives: " + std::to_string(groceryCount) + " groceries (" + std::to_string(serviceTime) + " minutes).\n";
+	std::string out("Customer ");
+	out += std::string((6 - std::to_string(customerNumber).length()), '0');
+	out += std::to_string(customerNumber);
+	out += " arrives: ";
+	out += std::to_string(groceryCount);
+	out += " groceries (";
+	out += std::to_string(serviceTime);
+	return out += " minutes).\n";
 }
 
 string Data::departureMessage() const
 {
-	return "Customer " + std::string((6 - std::to_string(customerNumber).length()), '0') + std::to_string(customerNumber) + " departs: " + std::to_string(totalTime) + " total minutes elapsed since arrival.\n";
+	std::string out("Customer ");
+	out += std::string((6 - std::to_string(customerNumber).length()), '0');
+	out += std::to_string(customerNumber);
+	out += " departs: ";
+	out += std::to_string(totalTime);
+	return out += " total minutes elapsed since arrival.\n";
 }
 
 int Data::getCustNum(void) const

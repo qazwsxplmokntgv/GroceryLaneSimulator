@@ -22,13 +22,22 @@ namespace utility {
 	}
 	std::string getTimeStamp(int minute)
 	{
-		return std::string("[")
-			+ std::to_string(minute / year) + "." //months
-			+ (((minute % year / month) < 10) ? "0" : "") + std::to_string(minute % year / month) + "." //months
-			+ (((minute % month / day) < 10) ? "0" : "") + std::to_string(minute % month / day) + "|" //days
-			+ (((minute % day / hour) < 10) ? "0" : "") + std::to_string(minute % day / hour) + ":" //hours
-			+ (((minute % hour) < 10) ? "0" : "") + std::to_string(minute % hour) //minutes
-			+ "]";
+		std::string timeStamp("[");
+		timeStamp.append(std::to_string(minute / year)); //year
+		timeStamp.push_back('.');
+		if ((minute % year / month) < 10) timeStamp.push_back('0'); //leading 0
+		timeStamp.append(std::to_string(minute % year / month)); //month
+		timeStamp.push_back('.');
+		if ((minute % month / day) < 10) timeStamp.push_back('0'); //leading 0
+		timeStamp.append(std::to_string(minute % month / day)); //days
+		timeStamp.push_back('|');
+		if ((minute % day / hour) < 10) timeStamp.push_back('0'); //leading 0
+		timeStamp.append(std::to_string(minute % day / hour)); //hours
+		timeStamp.push_back(':');
+		if ((minute % hour) < 10) timeStamp.push_back('0'); //leading 0
+		timeStamp.append(std::to_string(minute % hour)); //minutes
+		timeStamp.push_back(']');
+		return timeStamp;
 	}
 
 	std::string getUnits(timeUnit unit, bool asUpper)
@@ -83,17 +92,16 @@ namespace utility {
 	void printMenuHeader(void)
 	{
 		//menu controls
-		std::cout << std::string(
-			//title printout
-			"\033[1mZ & X / Arrow to Scroll\nSpace / Enter to Select\n") +
-			" _____                                 _____ _\n" +
-			"|  __ \\                               /  ___(_)\n" +
-			"| |  \\/_ __ ___   ___ ___ _ __ _   _  \\ `--. _ _ __ ___\n" +
-			"| | __| '__/ _ \\ / __/ _ \\ '__| | | |  `--. \\ | '_ ` _ \\\n" +
-			"| |_\\ \\ | | (_) | (_|  __/ |  | |_| | /\\__/ / | | | | | |\n" +
-			" \\____/_|  \\___/ \\___\\___|_|   \\__, | \\____/|_|_| |_| |_|\n" +
-			"                                __/ |\n"+
-			"                               |___/\n";
+		std::string out("\033[1mZ & X / Arrow to Scroll\nSpace / Enter to Select\n");
+		//title printout
+		out.append(" _____                                 _____ _\n");
+		out.append("|  __ \\                               /  ___(_)\n");
+		out.append("| |  \\/_ __ ___   ___ ___ _ __ _   _  \\ `--. _ _ __ ___\n");
+		out.append("| | __| '__/ _ \\ / __/ _ \\ '__| | | |  `--. \\ | '_ ` _ \\\n");
+		out.append("| |_\\ \\ | | (_) | (_|  __/ |  | |_| | /\\__/ / | | | | | |\n");
+		out.append(" \\____/_|  \\___/ \\___\\___|_|   \\__, | \\____/|_|_| |_| |_|\n");
+		out.append("                                __/ |\n");
+		std::cout << out.append("                               |___/\n");
 	}
 
 	int menuNav(int& currentSelection, int menuOpts, bool& stayInMenu)
@@ -148,8 +156,11 @@ namespace utility {
 			switch (currentMenu) {
 			case mainMenu: //menus with constant numbers of opts
 			case timeUnitMenu:
-				for (int i = 0; i < menuSizes[currentMenu]; ++i)
-					std::cout << (currentSelection == (i + 1) ? "\033[1m > " : "\033[0m   ") << (i + 1) << menuOpts[currentMenu][i];
+				for (int i = 0; i < menuSizes[currentMenu]; ++i) {
+					std::string out = (currentSelection == (i + 1) ? "\033[1m > " : "\033[0m   ");
+					out.append(std::to_string(i + 1));
+					std::cout << out.append(menuOpts[currentMenu][i]);
+				}
 				break;
 			case settingsMenu:
 			case laneAttMenu:
@@ -160,62 +171,89 @@ namespace utility {
 					for (int i = 0; i < totalOptCount; ++i) {
 						//numbering and selection indicator
 						std::string optNum = std::to_string(i + 1);
-						std::cout << (currentSelection == (i + 1) ? "\033[1m > " : "\033[0m   ") << std::setw(static_cast<unsigned long long>(highestOptDigitCount) + 1 - optNum.size()) << std::setfill(' ') << optNum;
+						std::string out = (currentSelection == (i + 1) ? "\033[1m > " : "\033[0m   ");
+						out.reserve(96);
+						for (int j = 0; j <= highestOptDigitCount - optNum.size(); ++j) out.push_back(' ');
+						out.append(optNum);
 						
 						if (currentMenu == settingsMenu) {
 							//print the option text
-							if (i < 8) //print the first 8 predefined options normally
-								std::cout << menuOpts[settingsMenu][i];
-							else if (i < 8 + settings.laneTypeCount) //assemble each lane count option
-								std::cout << ". " << settings.laneTypeAttributes[static_cast<std::vector<laneAttributeSet, std::allocator<laneAttributeSet>>::size_type>(i) - 8].laneName << " Lane Count                [";
+							if (i < 8) { //print the first 8 predefined options normally
+								out += menuOpts[settingsMenu][i];
+							}
+							else if (i < 8 + settings.laneTypeCount) { //assemble each lane count option
+								out += ". ";
+								out += settings.laneTypeAttributes[static_cast<std::vector<laneAttributeSet, std::allocator<laneAttributeSet>>::size_type>(i) - 8].laneName;
+								out += " Lane Count                [";
+							}
 							else //print the remaining options
-								std::cout << menuOpts[settingsMenu][static_cast<std::vector<std::string, std::allocator<std::string>>::size_type>(i) - settings.laneTypeCount];
+								out += menuOpts[settingsMenu][static_cast<std::vector<std::string, std::allocator<std::string>>::size_type>(i) - settings.laneTypeCount];
 
 							//appends the state of applicable options
 							//settings dependent on the states of others are locked and marked as such when said others override them
 							switch (i) {
 							case 0: //first 8 options (all toggles)
-								std::cout << (settings.includeQueuePrints && !settings.onlyPrintFinalQueues ? "TRUE" : "FALSE") << "]\t" //status
-									<< (settings.onlyPrintFinalQueues ? "[LOCKED BY 4]" : "") << "\n"; //locked indicator
+								out += (settings.includeQueuePrints && !settings.onlyPrintFinalQueues ? "TRUE]\t" : "FALSE]\t"); //status
+								if (settings.onlyPrintFinalQueues) out += "[LOCKED BY 4]"; //locked indicator
+								out.push_back('\n');
 								break;
 							case 1:
-								std::cout << (settings.includeArrivalsAndDepartures && !settings.onlyPrintFinalQueues ? "TRUE" : "FALSE") << "]\t"
-									<< (settings.onlyPrintFinalQueues ? "[LOCKED BY 4]" : "") << "\n";
+								out += (settings.includeArrivalsAndDepartures && !settings.onlyPrintFinalQueues ? "TRUE]\t" : "FALSE]\t");
+								if (settings.onlyPrintFinalQueues) out += "[LOCKED BY 4]";
+								out.push_back('\n');
 								break;
 							case 2:
-								std::cout << (settings.showGroceryLists && settings.includeArrivalsAndDepartures && !settings.onlyPrintFinalQueues ? "TRUE" : "FALSE") << "]\t"
-									<< (settings.onlyPrintFinalQueues ? "[LOCKED BY 4]" : !settings.includeArrivalsAndDepartures ? "[LOCKED BY 2]" : "") << "\n";
+								out += (settings.showGroceryLists && settings.includeArrivalsAndDepartures && !settings.onlyPrintFinalQueues ? "TRUE]\t" : "FALSE]\t");
+								if (settings.onlyPrintFinalQueues) out += "[LOCKED BY 4]";
+								else if (!settings.includeArrivalsAndDepartures) out += "[LOCKED BY 2]";
+								out.push_back('\n');
 								break;
 							case 3:
-								std::cout << (settings.onlyPrintFinalQueues ? "TRUE" : "FALSE") << "]\n";
+								out += (settings.onlyPrintFinalQueues ? "TRUE]\n" : "FALSE]\n");
 								break;
 							case 4:
-								std::cout << (settings.trackWorstTimes ? "TRUE" : "FALSE") << "]\n";
+								out += (settings.trackWorstTimes ? "TRUE]\n" : "FALSE]\n");
 								break;
 							case 5:
-								std::cout << (settings.pauseOnQueue && settings.includeQueuePrints && !settings.onlyPrintFinalQueues ? "TRUE" : "FALSE") << "]\t" 
-									<< (settings.onlyPrintFinalQueues ? "[LOCKED BY 4]" : !settings.includeQueuePrints ? "[LOCKED BY 1] " : "") << "\n";
+								out += (settings.pauseOnQueue && settings.includeQueuePrints && !settings.onlyPrintFinalQueues ? "TRUE]\t" : "FALSE]\t");
+								if (settings.onlyPrintFinalQueues) out += "[LOCKED BY 4]";
+								else if (!settings.includeQueuePrints) out += "[LOCKED BY 1]";
+								out.push_back('\n');
 								break;
 							case 6:
-								std::cout << (settings.clearOnQueue && settings.includeQueuePrints && !settings.onlyPrintFinalQueues ? "TRUE" : "FALSE") << "]\t" 
-									<< (settings.onlyPrintFinalQueues ? "[LOCKED BY 4]" : !settings.includeQueuePrints ? "[LOCKED BY 1] " : "") << "\n";
+								out += (settings.clearOnQueue && settings.includeQueuePrints && !settings.onlyPrintFinalQueues ? "TRUE]\t" : "FALSE]\t");
+								if (settings.onlyPrintFinalQueues) out += "[LOCKED BY 4]";
+								else if (!settings.includeQueuePrints) out += "[LOCKED BY 1]";
+								out.push_back('\n');
 								break;
 							case 7:
-								std::cout << (settings.measureExecutionTime ? "TRUE" : "FALSE") << "]\n";
+								out += (settings.measureExecutionTime ? "TRUE]\n" : "FALSE]\n");
 								break;
 							default: //remaining options - lane counts or the three options following them
 								switch (i - settings.laneTypeCount) {
 								default: //lane counts
-									std::cout << settings.laneCounts[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 8] << "]\n";
+									out += std::to_string(settings.laneCounts[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 8]);
+									out += "]\n";
 									break;
 								case 8: //recycle id interval
-									std::cout << ((double)settings.recycleIDInterval) / settings.inputUnits << "]\n";
+									{
+										std::ostringstream ss;
+										ss << ((double)settings.recycleIDInterval) / settings.inputUnits;
+										out += ss.str();
+									}
+									out += "]\n";
 									break;
 								case 9: //queue print interval
-									std::cout << ((double)settings.queuePrintInterval) / settings.inputUnits << "]\n";
+									{
+										std::ostringstream ss;
+										ss << ((double)settings.queuePrintInterval) / settings.inputUnits;
+										out += ss.str();
+									}
+									out += "]\n";
 									break;
 								case 10: //input units
-									std::cout << (getUnits(settings.inputUnits, true)) << "]\n";
+									out += (getUnits(settings.inputUnits, true));
+									out += "]\n";
 									break;
 								case 11:
 								case 12:
@@ -227,21 +265,27 @@ namespace utility {
 						else {
 							//print the option text
 							if (i < 2) //print the first 2 predefined options normally
-								std::cout << menuOpts[laneAttMenu][i];
+								out += menuOpts[laneAttMenu][i];
 							else if (i < 2 + settings.laneTypeCount) {
 								//generate each edit option
-								std::cout << ". Edit " << settings.laneTypeAttributes[static_cast<std::vector<laneAttributeSet, std::allocator<laneAttributeSet>>::size_type>(i) - 2].laneName
-									<< " Attributes  -  Grocery Counts: ["
-									<< std::setw(2) << std::setfill('0') << (double)settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].groceryCounts.param()._Min << "-"
-									<< std::setw(2) << std::setfill('0') << (double)settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].groceryCounts.param()._Max << "]"
-									<< std::setw(2) << std::setfill(' ') << " | Arrival Times: ["
-									<< std::setw(2) << std::setfill('0') << std::ceil((double)settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].arrivalTimes.param()._Min * 100 /*/ settings.inputUnits*/) / 100 << "-" //currently undecided on converting units here
-									<< std::setw(2) << std::setfill('0') << std::ceil((double)settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].arrivalTimes.param()._Max * 100 /*/ settings.inputUnits*/) / 100 << "]\n";
+								out += ". Edit ";
+								out += settings.laneTypeAttributes[static_cast<std::vector<laneAttributeSet, std::allocator<laneAttributeSet>>::size_type>(i) - 2].laneName;
+								out += " Attributes  -  Grocery Counts: [";
+								out += std::to_string(settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].groceryCounts.param()._Min);
+								out.push_back('-');
+								out += std::to_string(settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].groceryCounts.param()._Max);
+								out.push_back(']');
+								out += " | Arrival Times: [";
+								out += std::to_string(settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].arrivalTimes.param()._Min);
+								out.push_back('-');
+								out += std::to_string(settings.laneTypeAttributes[static_cast<std::vector<int, std::allocator<int>>::size_type>(i) - 2].arrivalTimes.param()._Max);
+								out += "]\n";
 							}
 							else { //print back option
-								std::cout << menuOpts[laneAttMenu][static_cast<std::vector<std::string, std::allocator<std::string>>::size_type>(menuSizes[laneAttMenu]) - 1];
+								out += menuOpts[laneAttMenu][static_cast<std::vector<std::string, std::allocator<std::string>>::size_type>(menuSizes[laneAttMenu]) - 1];
 							}
 						}
+						std::cout << out;
 					}
 					break; //outermost switch (menus)
 				}

@@ -92,7 +92,7 @@ bool List::insertAtEnd(const string& data)
 string List::listToString(void) const
 {
 	Node<string>* pCurr = pHead;
-	string out = "";
+	string out;
 	while (pCurr != nullptr) {
 		out += "\t\t";
 		out += pCurr->getData();
