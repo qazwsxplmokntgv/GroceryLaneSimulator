@@ -49,24 +49,27 @@ void GroceryLane::setNextArrivalTime(int newArrivalTime)
 	this->currentNextArrivalTime = newArrivalTime;
 }
 
-void GroceryLane::runSim(unsigned int minuteTotal, utility::simulationSettings settings, int laneTypeCount, std::vector<utility::laneAttributeSet>& laneAttributes)
+void GroceryLane::runSim(unsigned int minuteTotal, utility::simulationSettings settings, const int laneTypeCount, const std::vector<utility::laneAttributeSet>& laneAttributes)
 {
 	//starts execution timer
-	auto simStart = std::chrono::steady_clock::now();
+	const auto simStart = std::chrono::steady_clock::now();
 
 	//prng, referred to https://en.cppreference.com/w/cpp/numeric/random
 	mt19937 rng(utility::getTimeSeed());
 
 	//digits to show for each lane number, based on the largest one
 	//if no duplicate lanes are to be created, = 0
-	int laneNumberDigits = std::any_of(settings.laneCounts.cbegin(), settings.laneCounts.cend(), [](int count) { return count > 1; }) ? ((int)(std::log10(*std::max_element(settings.laneCounts.cbegin(), settings.laneCounts.cend()))) + 1) : 0;
+	const int laneNumberDigits = std::any_of(settings.laneCounts.cbegin(), settings.laneCounts.cend(),
+		[](int count) { return count > 1; }) ? 
+		((int)(std::log10(*std::max_element(settings.laneCounts.cbegin(), settings.laneCounts.cend()))) + 1) : 0;
 	
 	int laneCount = 0; //sum of each type lane count
-	std::for_each(settings.laneCounts.cbegin(), settings.laneCounts.cend(), [&laneCount](int count) { laneCount += count; });
+	std::for_each(settings.laneCounts.cbegin(), settings.laneCounts.cend(), [&laneCount](int indivLaneTypeCount) { laneCount += indivLaneTypeCount; });
 	
+	//vector of each lane to be simulated
 	std::vector<GroceryLane> lanes;
 
-	//creates lanes of each type
+	//creates lanes of each type to populate the vector
 	for (int laneType = 0; laneType < laneTypeCount; ++laneType) {
 		//creates each instance of a lane type
 		for (int laneTypeInstanceNum = 1; laneTypeInstanceNum <= settings.laneCounts[laneType]; ++laneTypeInstanceNum) {
@@ -74,10 +77,11 @@ void GroceryLane::runSim(unsigned int minuteTotal, utility::simulationSettings s
 
 			//adds lane numbering if there are multiple of at least one lane type
 			if (laneNumberDigits > 0) {
+				//converts the raw int distinguishing the lane from others of its type to a string
 				string rawLaneNum(std::to_string(laneTypeInstanceNum));
-				newLane.laneName.append("-");
+				newLane.laneName.push_back('-'); //dash separating lane name and number
 				//adds leading 0s if necessary to keep all lane number digit counts equal
-				for (int k = 0; k < laneNumberDigits - rawLaneNum.size(); ++k) newLane.laneName.append("0");
+				for (int k = 0; k < laneNumberDigits - rawLaneNum.size(); ++k) newLane.laneName.push_back('0');
 				//adds actual lane number to name following any leading 0s
 				newLane.laneName.append(rawLaneNum);
 			}
@@ -88,9 +92,8 @@ void GroceryLane::runSim(unsigned int minuteTotal, utility::simulationSettings s
 		}
 	}
 	
-	//trims vector size after lane creation is complete
+	//trims vector size after lane creation is finalized and complete
 	lanes.shrink_to_fit();
-
 
 	if (!lanes.empty()) { //if there are lanes
 		//time until the first customer arrives in any lane
@@ -100,13 +103,14 @@ void GroceryLane::runSim(unsigned int minuteTotal, utility::simulationSettings s
 		std::for_each(lanes.begin(), lanes.end(), [minutesUntilFirstArrival](GroceryLane& lane) { lane.setNextArrivalTime(lane.getNextArrivalTime() - minutesUntilFirstArrival); });
 	}
 
+	//consolidating booleans settings to avoid unnecessary checks during main simulation loop
 	if (settings.onlyPrintFinalQueues) { //disables non-final printouts 
 		settings.includeArrivalsAndDepartures = settings.includeQueuePrints = false;
 		std::cout << "Simulating"; //prints message to indicate the program running in the absence of in-progress printouts
 	} 
-	//avoids having to check redundant conditions during the main loop of the simulation
 	else if (settings.queuePrintInterval == 0) settings.includeQueuePrints = false;
 
+	//customers served since last ID reset
 	unsigned int customersServed = 0;
 
 	//simulation begins
@@ -120,8 +124,8 @@ void GroceryLane::runSim(unsigned int minuteTotal, utility::simulationSettings s
 		if (settings.includeQueuePrints && !(minute % settings.queuePrintInterval)) {
 			std::for_each(lanes.cbegin(), lanes.cend(), [minute](const GroceryLane& lane) { lane.printQueueWithHeader(minute); });
 			std::cout << '\n';
-			if (settings.pauseOnQueue) utility::pause();
-			if (settings.clearOnQueue) utility::clearScreen();
+			if (settings.pauseOnQueue) utility::pause(); //pause if should pause
+			if (settings.clearOnQueue) utility::clearScreen(); //clear if should clear
 		}
 		//ellipses loading animation if intermediate printouts are omitted
 		//1/4 progress || 1/2 progress || 3/4 progress
@@ -129,12 +133,12 @@ void GroceryLane::runSim(unsigned int minuteTotal, utility::simulationSettings s
 	}
 
 	//concluding the simulation
-	//clears "simulating..." message 
+	//clears "simulating..." message if present
 	if (settings.onlyPrintFinalQueues) utility::clearScreen();
 
 	//final queue printout
 	if (settings.includeQueuePrints || settings.onlyPrintFinalQueues)
-		std::for_each(lanes.begin(), lanes.end(), [minuteTotal](GroceryLane& lane) { lane.printQueueWithHeader(minuteTotal); });
+		std::for_each(lanes.cbegin(), lanes.cend(), [minuteTotal](const GroceryLane& lane) { lane.printQueueWithHeader(minuteTotal); });
 
 	std::cout << "\nSimulation Complete!\n\n";
 
@@ -145,7 +149,7 @@ void GroceryLane::runSim(unsigned int minuteTotal, utility::simulationSettings s
 			<< utility::getTimeStamp(lane.worstTime.start) << "-" << utility::getTimeStamp(lane.worstTime.end) << '\n';
 	}
 	//stops execution timer
-	auto executionTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - simStart).count();
+	const auto executionTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - simStart).count();
 	//execution time printout
 	//minutes:seconds:milliseconds
 	if (settings.measureExecutionTime) std::cout << "\nExecution Time: [" << std::setw(2) << std::setfill('0') << executionTime / 60000 << ":" << std::setw(2) << std::setfill('0') << (executionTime % 60000) / 1000 << ":" << std::setw(4) << std::setfill('0') << executionTime % 1000 << "]" << std::endl;
@@ -203,7 +207,7 @@ void GroceryLane::customerArrival(unsigned int& customersServed, std::mt19937& r
 void GroceryLane::customerDeparture(const utility::simulationSettings& settings, const unsigned int minute)
 {
 	//dequeues customer
-	Data departingCust = this->custQueue.dequeue();
+	const Data departingCust = this->custQueue.dequeue();
 
 	if (settings.includeArrivalsAndDepartures) {  //anounces departure
 		std::string out(utility::getTimeStamp(minute));

@@ -19,7 +19,7 @@ public:
 	int getNextArrivalTime(void) const;
 	void setNextArrivalTime(int newArrivalTime);
 
-	static void runSim(unsigned int minuteTotal, utility::simulationSettings settings, int laneTypeCount, std::vector<utility::laneAttributeSet>& laneTypeAttributes);
+	static void runSim(unsigned int minuteTotal, utility::simulationSettings settings, const int laneTypeCount, const std::vector<utility::laneAttributeSet>& laneTypeAttributes);
 
 	void customerArrival(unsigned int& customersServed, std::mt19937& rng, const utility::simulationSettings& settings, const unsigned int minute);
 	void customerDeparture(const utility::simulationSettings& settings, const unsigned int minute);
